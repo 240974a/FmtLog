@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="386" height="158" viewBox="0 0 386 158" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14">
+<rect width="100%" height="100%" rx="6" fill="#0d1117"/>
+<text y="31" xml:space="preserve"><tspan x="16.0" fill="#444444">[12s:104ms] </tspan><tspan x="117.0" fill="#9e9e9e">T </tspan><tspan x="133.9" fill="#ffffff">app</tspan><tspan x="159.1" fill="#9e9e9e">: такт 4096</tspan></text>
+<text y="52" xml:space="preserve"><tspan x="16.0" fill="#444444">[12s:341ms] </tspan><tspan x="117.0" fill="#0087ff">D </tspan><tspan x="133.9" fill="#00d7ff">net</tspan><tspan x="159.1" fill="#0087ff">: принято 128 байт</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16.0" fill="#444444">[12s:517ms] </tspan><tspan x="117.0" fill="#00d700">I </tspan><tspan x="133.9" fill="#ffffff">app</tspan><tspan x="159.1" fill="#00d700">: запуск, версия 1.0.0</tspan></text>
+<text y="94" xml:space="preserve"><tspan x="16.0" fill="#444444">[12s:754ms] </tspan><tspan x="117.0" fill="#00d700">I </tspan><tspan x="133.9" fill="#008700">sensor</tspan><tspan x="184.4" fill="#00d700">: бойлер 54.250 °C</tspan></text>
+<text y="115" xml:space="preserve"><tspan x="16.0" fill="#444444">[12s:930ms] </tspan><tspan x="117.0" fill="#ffaf00">W </tspan><tspan x="133.9" fill="#00d7ff">net</tspan><tspan x="159.1" fill="#ffaf00">: нет ответа 3 раз подряд</tspan></text>
+<text y="136" xml:space="preserve"><tspan x="16.0" fill="#444444">[13s:167ms] </tspan><tspan x="117.0" fill="#af0000">E </tspan><tspan x="133.9" fill="#008700">sensor</tspan><tspan x="184.4" fill="#af0000">: датчик не отвечает</tspan></text>
+</svg>

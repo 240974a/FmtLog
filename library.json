@@ -1,0 +1,31 @@
+{
+    "name": "FmtLog",
+    "version": "1.0.0",
+    "description": "Форматирование строк по образцу {} и лёгкий журнал для микроконтроллеров. Без динамической памяти, с буфером фиксированного размера и подключением своих типов через formatter<T>.",
+    "keywords": "format, logging, printf, string, debug",
+    "authors": [
+        {
+            "name": "Aleksey Grishin",
+            "email": "g-iot@mail.ru",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aleksey-grishin/FmtLog.git"
+    },
+    "license": "MIT",
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif8266",
+        "espressif32",
+        "atmelavr"
+    ],
+    "headers": "FmtLog.h",
+    "export": {
+        "exclude": [
+            "test",
+            ".pio"
+        ]
+    }
+}

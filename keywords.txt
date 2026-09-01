@@ -1,0 +1,64 @@
+#######################################
+# Подсветка синтаксиса для Arduino IDE
+#######################################
+
+#######################################
+# Типы (KEYWORD1)
+#######################################
+
+Fmt	KEYWORD1
+StringView	KEYWORD1
+HexDump	KEYWORD1
+FullDump	KEYWORD1
+Duration	KEYWORD1
+DateTime	KEYWORD1
+TimeOfDay	KEYWORD1
+EepromString	KEYWORD1
+Level	KEYWORD1
+Record	KEYWORD1
+Sink	KEYWORD1
+formatter	KEYWORD1
+
+#######################################
+# Методы и функции (KEYWORD2)
+#######################################
+
+format	KEYWORD2
+write	KEYWORD2
+clear	KEYWORD2
+truncated	KEYWORD2
+opt	KEYWORD2
+addSink	KEYWORD2
+removeSink	KEYWORD2
+clearSinks	KEYWORD2
+serialSink	KEYWORD2
+setLevel	KEYWORD2
+getLevel	KEYWORD2
+enabled	KEYWORD2
+setSourceNames	KEYWORD2
+setSourceColors	KEYWORD2
+setLevelColors	KEYWORD2
+levelColor	KEYWORD2
+sourceColor	KEYWORD2
+setEnabled	KEYWORD2
+levelMark	KEYWORD2
+sourceName	KEYWORD2
+trace	KEYWORD2
+debug	KEYWORD2
+info	KEYWORD2
+warning	KEYWORD2
+error	KEYWORD2
+traceFrom	KEYWORD2
+debugFrom	KEYWORD2
+infoFrom	KEYWORD2
+warningFrom	KEYWORD2
+errorFrom	KEYWORD2
+
+#######################################
+# Константы (LITERAL1)
+#######################################
+
+FMTLOG_MESSAGE_SIZE	LITERAL1
+FMTLOG_FLOAT_DECIMALS	LITERAL1
+FMTLOG_SOURCE_COUNT	LITERAL1
+FMTLOG_COMPILE_LEVEL	LITERAL1

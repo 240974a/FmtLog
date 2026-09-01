@@ -1,0 +1,6 @@
+.pio/
+.build_check/
+.vscode/
+*.o
+*.elf
+*.bin
