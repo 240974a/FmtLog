@@ -31,7 +31,7 @@ void setup() {
 
     log::traceFrom(app, F("такт {}"), millis());
     log::debugFrom(net, F("принято {} байт"), 128);
-    log::infoFrom(app, F("запуск, версия {}"), F("1.0.0"));
+    log::infoFrom(app, F("запуск, версия {}"), F("1.1.0"));
     log::infoFrom(sensor, F("бойлер {} °C"), 54.25);
     log::warningFrom(net, F("нет ответа {} раз подряд"), 3);
     log::errorFrom(sensor, F("датчик не отвечает"));

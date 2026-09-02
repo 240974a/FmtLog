@@ -5,6 +5,7 @@
 
 #include <unity.h>
 
+#include <math.h>
 #include <string.h>
 
 #include "Fmt.h"
@@ -260,6 +261,83 @@ namespace {
         TEST_ASSERT_EQUAL_STRING("второе", out.c_str());
     }
 
+
+    // --- дробные ----------------------------------------------------------
+
+    void test_float_basic() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{}", 54.25);
+        TEST_ASSERT_EQUAL_STRING("54.250", out.c_str());
+    }
+
+    void test_float_negative() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{} {}", -1.5, -0.001);
+        TEST_ASSERT_EQUAL_STRING("-1.500 -0.001", out.c_str());
+    }
+
+    // У -0.0 сравнение с нулём ложно, и минус легко потерять.
+    void test_float_negative_zero_keeps_sign() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{}", -0.0);
+        TEST_ASSERT_EQUAL_STRING("-0.000", out.c_str());
+    }
+
+    // Без ведущих нулей 0.05 напечаталось бы как 0.5
+    void test_float_leading_zeros_in_fraction() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{} {} {}", 0.05, 0.005, 0.5);
+        TEST_ASSERT_EQUAL_STRING("0.050 0.005 0.500", out.c_str());
+    }
+
+    // Округление могло переполнить дробную часть и должно поднять целую.
+    void test_float_rounding_carries_into_whole() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{}", 0.9999);
+        TEST_ASSERT_EQUAL_STRING("1.000", out.c_str());
+    }
+
+    // Ровная половина округляется к чётному - как в printf и dtostrf.
+    void test_float_half_rounds_to_even() {
+        char buf[64];
+        Fmt out(buf, sizeof(buf));
+        formatFloat(out, 0.5, 0);
+        out.write(' ');
+        formatFloat(out, 1.5, 0);
+        out.write(' ');
+        formatFloat(out, 2.5, 0);
+        out.write(' ');
+        formatFloat(out, 3.5, 0);
+        TEST_ASSERT_EQUAL_STRING("0 2 2 4", out.c_str());
+    }
+
+    void test_float_zero_decimals() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        formatFloat(out, 3.7, 0);
+        TEST_ASSERT_EQUAL_STRING("4", out.c_str());
+    }
+
+    // За пределом 2^32 дробной части у double уже нет.
+    void test_float_large_value() {
+        char buf[48];
+        Fmt out(buf, sizeof(buf));
+        formatFloat(out, 4294967296.0, 2);
+        TEST_ASSERT_EQUAL_STRING("4294967296.00", out.c_str());
+    }
+
+    void test_float_nan_and_inf() {
+        char buf[32];
+        Fmt out(buf, sizeof(buf));
+        out.format("{} {} {}", NAN, INFINITY, -INFINITY);
+        TEST_ASSERT_EQUAL_STRING("nan inf -inf", out.c_str());
+    }
+
 } // namespace
 
 // Так подключается свой тип: одна специализация formatter<T>.
@@ -287,6 +365,15 @@ int main() {
     RUN_TEST(test_unsigned_upper_bound);
     RUN_TEST(test_zero);
     RUN_TEST(test_bool_and_char);
+    RUN_TEST(test_float_basic);
+    RUN_TEST(test_float_negative);
+    RUN_TEST(test_float_negative_zero_keeps_sign);
+    RUN_TEST(test_float_leading_zeros_in_fraction);
+    RUN_TEST(test_float_rounding_carries_into_whole);
+    RUN_TEST(test_float_half_rounds_to_even);
+    RUN_TEST(test_float_zero_decimals);
+    RUN_TEST(test_float_large_value);
+    RUN_TEST(test_float_nan_and_inf);
     RUN_TEST(test_duration);
     RUN_TEST(test_datetime);
     RUN_TEST(test_time_of_day);

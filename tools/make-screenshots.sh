@@ -47,7 +47,7 @@ int main() {
     log::setLevel(Level::trace);
     log::traceFrom(0, "такт {}", 4096);
     log::debugFrom(1, "принято {} байт", 128);
-    log::infoFrom(0, "запуск, версия {}", "1.0.0");
+    log::infoFrom(0, "запуск, версия {}", "1.1.0");
     log::infoFrom(2, "бойлер {} °C", 54.25);
     log::warningFrom(1, "нет ответа {} раз подряд", 3);
     log::errorFrom(2, "датчик не отвечает");

@@ -136,6 +136,20 @@ namespace fmtlog {
         writeDigits(out, value, false);
     }
 
+    namespace {
+        // Степени десяти для сдвига дробной части. Больше девяти знаков после
+        // запятой double всё равно не различает.
+        constexpr uint32_t kPow10[] = {
+            1u, 10u, 100u, 1000u, 10000u,
+            100000u, 1000000u, 10000000u, 100000000u, 1000000000u,
+        };
+        constexpr uint8_t kMaxDecimals = sizeof(kPow10) / sizeof(kPow10[0]) - 1;
+
+        // Начиная с этого значения дробная часть double уже не хранится, и
+        // раскладывать число на две целые бессмысленно.
+        constexpr double kIntegerOnly = 4294967296.0; // 2^32
+    } // namespace
+
     void formatFloat(Fmt& out, double value, uint8_t decimals) {
         if(isnan(value)) {
             formatFlashString(out, F("nan"));
@@ -145,13 +159,65 @@ namespace fmtlog {
             formatFlashString(out, value < 0 ? F("-inf") : F("inf"));
             return;
         }
-        // dtostrf пишет прямо в буфер, поэтому нужен запас под самое длинное
-        // представление - иначе он выйдет за край.
-        constexpr size_t kMaxLen = 24;
-        if(char* room = out.claim(kMaxLen)) {
-            dtostrf(value, 0, decimals, room);
-            out.commit(strlen(room));
+        if(decimals > kMaxDecimals)
+            decimals = kMaxDecimals;
+
+        // Знак берём у самого значения, а не сравнением: у -0.0 сравнение
+        // с нулём ложно, и минус потерялся бы.
+        const bool negative = signbit(value);
+        if(negative)
+            value = -value;
+
+        // За этой границей у double дробной части уже нет, а в uint32 число
+        // не помещается. Печатаем целую часть и дописываем нули после запятой -
+        // округлять там нечего.
+        if(value >= kIntegerOnly) {
+            if(negative)
+                out.write('-');
+            writeDigits(out, static_cast<uint64_t>(value), false);
+            if(decimals) {
+                out.write('.');
+                for(uint8_t i = 0; i < decimals; ++i)
+                    out.write('0');
+            }
+            return;
         }
+
+        const uint32_t scale = kPow10[decimals];
+
+        uint32_t whole = static_cast<uint32_t>(value);
+        const double rest = (value - whole) * scale;
+
+        // Округление к ближайшему, а ровная половина - к чётному. Так же
+        // округляют printf и dtostrf, иначе вывод разошёлся бы с привычным.
+        //
+        // Чётность смотрим у последнего печатаемого разряда: при decimals = 0
+        // дробной части нет, и решает чётность целой.
+        uint32_t fraction = static_cast<uint32_t>(rest);
+        const double tail = rest - fraction;
+        const bool lastDigitOdd = decimals ? (fraction & 1) : (whole & 1);
+        if(tail > 0.5 || (tail == 0.5 && lastDigitOdd))
+            ++fraction;
+
+        // Округление могло переполнить дробную часть: 0.999 -> 1.000
+        if(fraction >= scale) {
+            fraction -= scale;
+            ++whole;
+        }
+
+        if(negative)
+            out.write('-');
+        writeDigits(out, whole, false);
+
+        if(!decimals)
+            return;
+
+        out.write('.');
+        // Ведущие нули дробной части: 0.05 - это 5 при scale 100, и без них
+        // напечаталось бы 0.5
+        for(uint32_t limit = scale / 10; limit > 1 && fraction < limit; limit /= 10)
+            out.write('0');
+        writeDigits(out, fraction, false);
     }
 
     void formatter<bool>::format(Fmt& out, bool value) {
