@@ -32,26 +32,6 @@ namespace fmtlog {
                 cursors[i].active = false;
             }
 
-            // Строка потока: время, буква уровня, источник и текст, разделённые
-            // табуляцией. Страница разбирает её по первому же разделителю, а в
-            // самом сообщении табуляция роли не играет - оно идёт последним.
-            void writeRecord(WiFiClient& to, const Record& record) {
-                char head[40];
-                Fmt out(head, sizeof(head));
-                log::writeTimestamp(out, record);
-                to.print(F("data: "));
-                to.write(out.c_str(), out.length());
-                to.print('\t');
-                to.print(log::levelMark(record.level));
-                to.print('\t');
-                to.print(log::sourceName(record.source));
-                to.print('\t');
-                to.write(record.text, record.length);
-                if(record.truncated)
-                    to.print(F(" ..."));
-                to.print(F("\n\n"));
-            }
-
             void startStream(WiFiClient& to, uint8_t slot) {
                 // Страница лежит у вас на диске, а поток приходит с платы -
                 // для браузера это разные источники, и без этого заголовка он
@@ -87,6 +67,11 @@ namespace fmtlog {
         void sink(const Record& record) {
             // В историю кладём уже готовую строку потока: так вкладке,
             // открытой позже, достанется ровно то же, что видели первые.
+            //
+            // Строка потока: время, буква уровня, источник и текст,
+            // разделённые табуляцией. Страница разбирает её по первым
+            // разделителям, а в самом сообщении табуляция роли не играет -
+            // оно идёт последним.
             char line[FMTLOG_MESSAGE_SIZE + 64];
             Fmt out(line, sizeof(line));
             log::writeTimestamp(out, record);

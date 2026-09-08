@@ -1,46 +1,192 @@
 <!doctype html><html lang=en><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Log</title><style>
-:root{--bg:#0d1117;--fg:#c9d1d9;--dim:#6e7681;--line:#21262d}
+/* Две темы. Все цвета - переменными, поэтому смена темы это смена их
+   значений, а не правки в каждом правиле. Уровни различаются и на светлом,
+   и на тёмном: для светлого взяты те же тона потемнее. */
+:root{--bg:#0d1117;--fg:#c9d1d9;--dim:#7d8590;--line:#21262d;
+ --ctl:#161b22;--hov:#1c2129;--act:#0d1117;--sel:#388bfd;--mark:#bb8009;
+ --mark-fg:#000;--row:#161b22;--veil:#161b22e0;--shade:#0008;
+ --lT:#8b949e;--lD:#58a6ff;--lI:#3fb950;--lW:#d29922;--lE:#f85149;
+ --lC:#bc8cff;--lS:#fff;--sline:#30363d;--on:#3fb950;--off:#d29922}
+:root.light{--bg:#fff;--fg:#1f2328;--dim:#6a737d;--line:#d8dee4;
+ --ctl:#f6f8fa;--hov:#eaeef2;--act:#e1e6eb;--sel:#0969da;--mark:#fff3c0;
+ --mark-fg:#1f2328;--row:#f6f8fa;--veil:#fffffff0;--shade:#00000026;
+ --lT:#6a737d;--lD:#0550ae;--lI:#116329;--lW:#8a5b00;--lE:#cf222e;
+ --lC:#8250df;--lS:#1f2328;--sline:#d8dee4;--on:#1a7f37;--off:#9a6700}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:13px ui-monospace,Menlo,Consolas,monospace}
-header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,button{background:#161b22;color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:4px 8px;font:inherit}
-button{cursor:pointer}button:hover{border-color:var(--dim)}
-#s{flex:1;min-width:120px}
+/* Панель управления: элементы собраны в группы по смыслу, между группами -
+   разделитель. Так глаз находит нужное по месту, а не перечитывает всю
+   полосу. */
+header{position:sticky;top:0;z-index:8;background:var(--bg);
+ border-bottom:1px solid var(--line);padding:6px 8px;
+ display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.g{display:flex;gap:4px;align-items:center;padding:0 8px;
+ border-right:1px solid var(--line)}
+.g:last-of-type{border-right:none}
+.g>label{color:var(--dim);font-size:11px;text-transform:uppercase;
+ letter-spacing:.04em;margin-right:2px;user-select:none}
+input,select,button{background:var(--ctl);color:var(--fg);
+ border:1px solid var(--line);border-radius:4px;padding:3px 7px;font:inherit}
+input:focus,select:focus{outline:none;border-color:var(--sel)}
+button{cursor:pointer}button:hover{border-color:var(--dim);background:var(--hov)}
+button:active{background:var(--act)}
+.ic{padding:3px 8px;min-width:28px;text-align:center}
+#s{flex:1;min-width:110px}
+/* Адрес платы: помещается самый длинный - 255.255.255.255:65535, это 21 знак.
+   Шрифт моноширинный, поэтому ширину задаём прямо в знаках. */
+#host{width:22ch;min-width:22ch}
+/* Связь с платой: точка меняет цвет, слово подписывает её состояние. */
+#conn{display:flex;gap:6px;align-items:center;
+ padding-left:8px;color:var(--dim);font-size:11px}
+#dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+#dot.on{background:var(--on)}#dot.off{background:var(--off)}
+/* Переключатель темы: значки лежат друг на друге, при смене темы один
+   уезжает вверх, другой приходит снизу - видно, что именно переключилось. */
+#th{position:relative;width:30px;height:24px;padding:0;overflow:hidden;
+ flex:none;margin-left:auto}
+#th span{position:absolute;inset:0;display:flex;align-items:center;
+ justify-content:center;font-size:13px;line-height:1;
+ transition:transform .18s ease,opacity .18s ease}
+#th .sun{transform:translateY(0);opacity:1}
+#th .moon{transform:translateY(100%);opacity:0}
+:root.light #th .sun{transform:translateY(-100%);opacity:0}
+:root.light #th .moon{transform:translateY(0);opacity:1}
 #log{padding:4px 8px}
 .r{white-space:pre-wrap;word-break:break-word;padding:1px 0;border-left:3px solid transparent;padding-left:6px}
-.r:hover{background:#161b22}
+.r:hover{background:var(--row)}
 .t{color:var(--dim)}
-.T{color:#8b949e}.D{color:#58a6ff}.I{color:#3fb950}.W{color:#d29922}.E{color:#f85149}
-.C{color:#bc8cff;border-left-color:#bc8cff}.S{color:#fff;border-left-color:#30363d}
+.T{color:var(--lT)}.D{color:var(--lD)}.I{color:var(--lI)}
+.W{color:var(--lW)}.E{color:var(--lE)}
+.C{color:var(--lC);border-left-color:var(--lC)}
+.S{color:var(--lS);border-left-color:var(--sline)}
 .hid{display:none}
 #st{color:var(--dim);font-size:11px}
-mark{background:#bb8009;color:#000}
+mark{background:var(--mark);color:var(--mark-fg)}
+/* Кнопка возврата к свежим строкам: висит над текстом, пока читают старое. */
+#tail{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:9;
+ background:var(--veil);border:1px solid var(--dim);border-radius:16px;
+ padding:6px 14px;backdrop-filter:blur(2px);box-shadow:0 2px 8px var(--shade)}
+#tail.hid{display:none}
+#tail b{color:var(--on);font-weight:normal}
 </style>
 <header>
-<input id=host placeholder="192.168.1.50" size=13 title="board address">
-<input id=s placeholder="search" autocomplete=off>
-<select id=lv><option value=0>all</option><option value=1>debug+</option>
-<option value=2>info+</option><option value=3>warn+</option><option value=4>error+</option></select>
-<input id=dt type=date title="jump to date">
-<button id=pause>pause</button><button id=clr>clear</button><button id=exp>export</button>
-<span id=st>connecting</span>
+<span class=g><label for=host>плата</label>
+ <input id=host list=hosts placeholder="192.168.1.50" size=22
+  title="адрес платы; прежние - в списке" autocomplete=off>
+ <datalist id=hosts></datalist>
+ <button id=hdel class=ic title="забыть этот адрес">×</button></span>
+
+<span class=g><label for=s>фильтр</label>
+ <input id=s placeholder="поиск" autocomplete=off>
+ <select id=lv title="уровень и выше">
+  <option value=0>все</option><option value=1>debug+</option>
+  <option value=2>info+</option><option value=3>warn+</option>
+  <option value=4>error+</option></select></span>
+
+<span class=g><label>время</label>
+ <button id=h1 class=ic title="шаг назад">−</button>
+ <select id=step title="размер шага">
+  <option value=1>1 мин</option><option value=10>10 мин</option>
+  <option value=60 selected>1 час</option><option value=720>12 час</option>
+  <option value=1440>сутки</option></select>
+ <button id=h2 class=ic title="шаг вперёд">+</button></span>
+
+<span class=g><label>журнал</label>
+ <button id=pause title="остановить поток">пауза</button>
+ <button id=clr title="убрать всё с экрана">очистить</button>
+ <button id=exp title="сохранить в файл">выгрузить</button></span>
+
+<button id=th title="сменить тему"><span class=sun>☀</span><span class=moon>☾</span></button>
+<span id=conn><span id=dot></span><span id=st>подключение</span></span>
 </header>
 <div id=log></div>
+<button id=tail class=hid>Читать последнее<b></b></button>
 <script>
-const L='TDIWECS',log=document.getElementById('log'),st=document.getElementById('st');
-let rows=[],paused=false,hold=[];
+const L='TDIWECS',log=document.getElementById('log'),st=document.getElementById('st'),
+      tail=document.getElementById('tail'),dot=document.getElementById('dot');
+
+// Состояние связи показываем в одном месте: слово рядом с точкой, цвет точки
+// повторяет его для тех, кто смотрит краем глаза.
+function setConn(text,state){
+  st.textContent=text;
+  dot.className=state||'';
+}
+const liveText=()=>es&&es.readyState===1?'на связи':'переподключение';
+const liveState=()=>es&&es.readyState===1?'on':'off';
+let rows=[],paused=false,hold=[],unread=0;
+
+// Хвост уже показанных строк - по нему отличаем повтор истории от новой
+// строки. Держим ровно столько, сколько хранит плата: дальше повторов не будет.
+const seen=new Set();
+
+// Куда мы шагали кнопками -час/+час в прошлый раз. Отсчитывать каждый шаг
+// заново от того, что видно на экране, нельзя: попавшая наверх строка почти
+// никогда не совпадает с запрошенным временем, и промах копился бы с каждым
+// нажатием.
+let aimAt=null;
+
+// Держимся низа, пока читатель сам оттуда не ушёл. Как только ушёл - страница
+// замирает на прочитанном месте, а новые строки ждут за кнопкой.
+let atBottom=true;
+const nearBottom=()=>
+  window.innerHeight+window.scrollY>=document.body.scrollHeight-40;
+
+function toBottom(){
+  window.scrollTo(0,document.body.scrollHeight);
+  atBottom=true;unread=0;showTail();
+}
+function showTail(){
+  tail.classList.toggle('hid',atBottom);
+  tail.querySelector('b').textContent=unread?'  +'+unread:'';
+}
+addEventListener('scroll',()=>{
+  const now=nearBottom();
+  if(now===atBottom)return;
+  atBottom=now;
+  if(now)unread=0;
+  showTail();
+  aimAt=null;   // читатель ушёл сам - шагать дальше от его места
+});
+tail.onclick=toBottom;
+
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-function add(r){
+
+// Строка потока: время, буква уровня, источник и текст через табуляцию. Разбор
+// один и тот же и для сети, и для сохранённого - хранится ровно то, что пришло.
+function parse(line){
+  const p=line.split('\t');
+  return p.length<4?null:{t:p[0],l:p[1],s:p[2],m:p.slice(3).join('\t')};
+}
+const raw=r=>[r.t,r.l,r.s,r.m].join('\t');
+function add(r,fromStore){
+  const line=raw(r);
+  // Плата при подключении заново отдаёт свою историю, а часть её уже лежит у
+  // нас с прошлого раза. Свежую строку сверяем с хвостом - повторы отбрасываем.
+  if(!fromStore&&seen.has(line))return;
+  seen.add(line);
+
   const d=document.createElement('div');d.className='r '+r.l;
   d.dataset.lv=L.indexOf(r.l);d.dataset.txt=(r.s+' '+r.m).toLowerCase();
-  d.dataset.day=r.t.slice(0,8);
+  d.dataset.t=r.t;d.dataset.raw=line;
   d.innerHTML='<span class=t>'+esc(r.t)+'</span> '+r.l+' '+esc(r.s)+': '+esc(r.m);
   log.appendChild(d);rows.push(d);
-  while(rows.length>2000)rows.shift().remove();
+
+  // Старые строки удаляются сверху, и читаемый текст съехал бы вверх на их
+  // высоту. Пока читают старое, возвращаем страницу на место сами.
+  while(rows.length>2000){
+    const gone=rows.shift(),h=gone.offsetHeight;
+    seen.delete(gone.dataset.raw);
+    gone.remove();
+    if(!atBottom)window.scrollBy(0,-h);
+  }
+
+  if(!fromStore)saveSoon();
+
   filter1(d);
-  if(!paused)window.scrollTo(0,document.body.scrollHeight);
+  if(atBottom&&!paused)window.scrollTo(0,document.body.scrollHeight);
+  else if(!d.classList.contains('hid')){++unread;showTail()}
 }
 function filter1(d){
   const q=document.getElementById('s').value.toLowerCase(),
@@ -51,42 +197,217 @@ function filter1(d){
 function filterAll(){rows.forEach(filter1)}
 document.getElementById('s').oninput=filterAll;
 document.getElementById('lv').onchange=filterAll;
-document.getElementById('dt').onchange=e=>{
-  const d=e.target.value.slice(2).replace(/-/g,'-');
-  const hit=rows.find(r=>r.dataset.day>=d);
-  if(hit)hit.scrollIntoView({block:'center'});
-};
+// Шаг по времени: назад и вперёд от строки, которая сейчас наверху экрана.
+// Отсчитывать от края экрана, а не от последней строки, значит идти именно
+// оттуда, докуда дочитали.
+//
+// Отметки вида "26-09-03 12:30:45.123" сравниваются как текст: старший разряд
+// в них слева, поэтому порядок совпадает с временным. Пока время не задано,
+// приходит "steady : ..." - такие строки в переходе не участвуют.
+const dated=r=>/^\d\d-/.test(r.dataset.t||'');
+function topRow(){
+  const y=document.querySelector('header').getBoundingClientRect().bottom;
+  return rows.find(r=>!r.classList.contains('hid')&&
+                      r.getBoundingClientRect().bottom>y);
+}
+function jumpTo(row){
+  atBottom=false;unread=0;showTail();
+  row.scrollIntoView({block:'start'});
+  // Строка не должна прятаться под шапкой.
+  window.scrollBy(0,-document.querySelector('header').offsetHeight-4);
+}
+// Тема: выбранная помнится, а при первом открытии берётся системная - у кого
+// светлая система, тому и страницу привычнее видеть светлой.
+const root=document.documentElement;
+function setTheme(light){
+  root.classList.toggle('light',light);
+  try{localStorage.setItem('theme',light?'light':'dark')}catch(e){}
+}
+(function(){
+  let saved=null;
+  try{saved=localStorage.getItem('theme')}catch(e){}
+  const system=window.matchMedia&&
+               window.matchMedia('(prefers-color-scheme: light)').matches;
+  root.classList.toggle('light',saved?saved==='light':system);
+})();
+document.getElementById('th').onclick=()=>setTheme(!root.classList.contains('light'));
+
+// Сколько секунд между двумя отметками. Нужно, чтобы выбрать из двух соседних
+// строк ту, что ближе к запрошенному времени.
+const asDate=m=>new Date('20'+m.slice(0,8).replace(/-/g,'/')+' '+m.slice(9,17));
+const gap=(a,b)=>Math.abs(asDate(b)-asDate(a));
+
+// Размер шага в минутах. Помним между открытиями страницы: кто ходит по
+// суткам, обычно ходит по суткам и дальше.
+const STEP=document.getElementById('step');
+STEP.value=localStorage.getItem('step')||'60';
+STEP.onchange=()=>localStorage.setItem('step',STEP.value);
+
+function shiftBy(steps){
+  const dates=rows.filter(dated);
+  if(!dates.length)return;
+  const delta=steps*(+STEP.value);   // в минутах
+
+  // Первый шаг - от строки наверху экрана, дальше - от собственной цели.
+  let base=aimAt;
+  if(!base){
+    const from=topRow()||rows[rows.length-1];
+    base=dated(from)?from.dataset.t
+        :(dates.find(r=>rows.indexOf(r)>=rows.indexOf(from))||dates[dates.length-1]).dataset.t;
+  }
+
+  const t=new Date('20'+base.slice(0,8).replace(/-/g,'/')+' '+base.slice(9,17));
+  t.setMinutes(t.getMinutes()+delta);
+  const p=n=>String(n).padStart(2,'0');
+  const want=p(t.getFullYear()%100)+'-'+p(t.getMonth()+1)+'-'+p(t.getDate())+
+             ' '+p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds());
+
+  // Берём строку, ближайшую к цели с любой стороны. Строго "не позже цели"
+  // на разреженном журнале уводило бы далеко: если в нужный час писали редко,
+  // ближайшая снизу может отстоять на полчаса, тогда как сверху есть соседняя
+  // через минуту.
+  //
+  // Сравниваем по секундам: в отметке есть доли, в цели их нет, и без обрезки
+  // строка ровно на границе шага считалась бы позже цели.
+  const sec=r=>r.dataset.t.slice(0,want.length);
+  const after=dates.find(r=>sec(r)>=want);
+  const before=[...dates].reverse().find(r=>sec(r)<=want);
+
+  let hit;
+  if(after&&before) hit=gap(sec(before),want)<=gap(want,sec(after))?before:after;
+  else hit=after||before;
+  if(!hit)return;
+
+  // Целью запоминаем запрошенное время, но не дальше края журнала: шагнув за
+  // край, цель ушла бы в пустоту, и чтобы вернуться, пришлось бы отщёлкать
+  // вслепую всё, что мы прошли мимо.
+  const edge=sec(delta>0?dates[dates.length-1]:dates[0]);
+  aimAt=delta>0?(want<edge?want:edge):(want>edge?want:edge);
+
+  if(hit!==topRow()){jumpTo(hit);return}
+
+  // Никуда не сдвинулись - дальше журнала нет.
+  setConn(delta>0?'дальше ничего нет':'раньше ничего нет','');
+  setTimeout(()=>setConn(liveText(),liveState()),1500)
+}
+document.getElementById('h1').onclick=()=>shiftBy(-1);
+document.getElementById('h2').onclick=()=>shiftBy(1);
 document.getElementById('pause').onclick=e=>{
-  paused=!paused;e.target.textContent=paused?'resume':'pause';
+  paused=!paused;e.target.textContent=paused?'продолжить':'пауза';
   if(!paused){hold.forEach(add);hold=[]}
 };
-document.getElementById('clr').onclick=()=>{log.innerHTML='';rows=[]};
+document.getElementById('clr').onclick=()=>{
+  // Спрашиваем: очистка убирает и сохранённое, вернуть его будет неоткуда -
+  // плата отдаст лишь свою историю, последние несколько десятков строк.
+  if(!rows.length)return;
+  if(!confirm('Убрать '+rows.length+' строк? Сохранённое тоже удалится.'))return;
+  log.innerHTML='';rows=[];seen.clear();
+  try{localStorage.removeItem(storeKey())}catch(e){}
+};
 document.getElementById('exp').onclick=()=>{
   const txt=rows.filter(r=>!r.classList.contains('hid')).map(r=>r.textContent).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
   a.download='log.txt';a.click();
 };
-// Адрес платы помним между открытиями страницы.
-const H=document.getElementById('host');
-H.value=localStorage.getItem('host')||'';
+// Журнал переживает перезагрузку страницы: строки лежат в браузере, привязанные
+// к адресу платы. Иначе F5 в разгар разбора стирал бы всё, что успели набрать,
+// а плата отдаёт только свою историю - последние несколько десятков строк.
+//
+// Пишем не на каждую строку, а раз в секунду: при частом журнале запись на
+// каждую заметно тормозила бы страницу.
+const KEEP=2000;
+let saveTimer=null;
+
+function storeKey(){ return 'log:'+(H.value.trim()||'?'); }
+
+function save(){
+  saveTimer=null;
+  try{
+    const keep=rows.slice(-KEEP).map(r=>r.dataset.raw);
+    localStorage.setItem(storeKey(),JSON.stringify(keep));
+  }catch(e){
+    // Место кончилось - выбрасываем половину и пробуем ещё раз. Потерять
+    // старые строки лучше, чем не сохранить ничего.
+    try{
+      const half=rows.slice(-Math.floor(KEEP/2)).map(r=>r.dataset.raw);
+      localStorage.setItem(storeKey(),JSON.stringify(half));
+    }catch(e2){}
+  }
+}
+function saveSoon(){ if(!saveTimer) saveTimer=setTimeout(save,1000); }
+
+function restore(){
+  let saved;
+  try{ saved=JSON.parse(localStorage.getItem(storeKey())||'[]'); }
+  catch(e){ return }
+  if(!saved.length)return;
+  const wasAtBottom=atBottom;
+  atBottom=true;
+  saved.forEach(line=>{const r=parse(line); if(r)add(r,true)});
+  atBottom=wasAtBottom;
+}
+
+// Адрес платы: из ссылки, иначе - из списка прежних, самый свежий сверху.
+// Ссылка главнее, чтобы log.html?host=192.168.1.50 всегда вела куда сказано;
+// её адрес тоже попадает в список. Так на каждую плату держат свою закладку,
+// а без закладки выбирают из тех, к кому уже подключались.
+const H=document.getElementById('host'),HL=document.getElementById('hosts');
+const HOSTS=8;   // длиннее список только мешает: плат обычно единицы
+
+function knownHosts(){
+  try{ return JSON.parse(localStorage.getItem('hosts')||'[]'); }catch(e){ return [] }
+}
+function showHosts(){
+  HL.innerHTML=knownHosts().map(h=>'<option value="'+esc(h)+'">').join('');
+}
+function rememberHost(h){
+  // Свежий - первым: к последней плате возвращаются чаще всего.
+  const list=[h].concat(knownHosts().filter(x=>x!==h)).slice(0,HOSTS);
+  try{ localStorage.setItem('hosts',JSON.stringify(list)) }catch(e){}
+  showHosts();
+}
+function forgetHost(h){
+  try{ localStorage.setItem('hosts',JSON.stringify(knownHosts().filter(x=>x!==h))) }
+  catch(e){}
+  showHosts();
+}
+
+showHosts();
+const fromUri=new URLSearchParams(location.search).get('host');
+H.value=(fromUri||knownHosts()[0]||'').trim();
+
+// Забыть адрес вместе с его журналом: держать историю платы, к которой больше
+// не подключаются, незачем.
+document.getElementById('hdel').onclick=()=>{
+  const h=H.value.trim();
+  if(!h)return;
+  if(!confirm('Забыть '+h+' и сохранённый от неё журнал?'))return;
+  try{ localStorage.removeItem(storeKey()) }catch(e){}
+  forgetHost(h);
+  H.value=knownHosts()[0]||'';
+  log.innerHTML='';rows=[];seen.clear();
+  H.value?(restore(),connect()):setConn('укажите адрес платы','');
+};
+
 let es=null;
 function connect(){
   const h=H.value.trim();
-  if(!h){st.textContent='enter board address';return}
-  localStorage.setItem('host',h);
+  if(!h){setConn('укажите адрес платы','');return}
+  rememberHost(h);
   if(es)es.close();
-  st.textContent='connecting';
+  setConn('подключение','');
   es=new EventSource('http://'+h+'/log');
-  es.onopen=()=>st.textContent='live';
-  es.onerror=()=>st.textContent='reconnecting';
+  es.onopen=()=>setConn('на связи','on');
+  es.onerror=()=>setConn('переподключение','off');
   es.onmessage=e=>{
-    const p=e.data.split('\t');
-    if(p.length<4)return;
-    const r={t:p[0],l:p[1],s:p[2],m:p.slice(3).join('\t')};
-    paused?hold.push(r):add(r);
+    const r=parse(e.data);
+    if(r)paused?hold.push(r):add(r);
   };
 }
 H.onchange=connect;
-if(H.value)connect();else st.textContent='enter board address';
+H.value?(restore(),connect()):setConn('укажите адрес платы','');
+
+// Уходя, дописываем то, что не успел отложенный сохранитель.
+addEventListener('beforeunload',()=>{if(saveTimer)save()});
 </script></html>
