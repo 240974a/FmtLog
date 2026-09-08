@@ -1,0 +1,14 @@
+# Источник данных прописывается сам, чтобы после запуска сразу открыть журнал.
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    # Имя контейнера из docker-compose.yml: внутри сети Docker обращаются по
+    # нему, а не по localhost.
+    url: http://loki:3100
+    isDefault: true
+    jsonData:
+      # Плата шлёт строки пачками, поэтому лишние повторные запросы ни к чему.
+      maxLines: 1000

@@ -93,3 +93,56 @@
 #define FMTLOG_SNMP_OID_PARTS 16
 #endif
 
+// --- журнал в Loki (FmtLoki.h) --------------------------------------------
+
+// Сколько строк копится до отправки. Пачкой дешевле: у Loki на каждый запрос
+// свои накладные, и сетевые, и на его стороне.
+#ifndef FMTLOG_LOKI_BATCH
+#define FMTLOG_LOKI_BATCH 16
+#endif
+
+// Через сколько миллисекунд отправлять неполную пачку. Иначе редкие строки
+// ждали бы в буфере, пока не наберётся полная.
+#ifndef FMTLOG_LOKI_INTERVAL_MS
+#define FMTLOG_LOKI_INTERVAL_MS 5000
+#endif
+
+// Сколько знаков строки уходит в Loki.
+#ifndef FMTLOG_LOKI_TEXT_SIZE
+#define FMTLOG_LOKI_TEXT_SIZE 96
+#endif
+
+// Сколько своих меток задаёт приложение. Меток должно быть немного: в Loki
+// каждое их сочетание заводит отдельный поток.
+#ifndef FMTLOG_LOKI_LABELS
+#define FMTLOG_LOKI_LABELS 4
+#endif
+
+// Длина имени и значения метки вместе с завершающим нулём.
+#ifndef FMTLOG_LOKI_LABEL_SIZE
+#define FMTLOG_LOKI_LABEL_SIZE 24
+#endif
+
+// Буфер под тело запроса. Он должен вмещать всю пачку целиком: строка
+// занимает свою длину плюс около тридцати знаков на отметку времени и
+// скобки, а экранирование кавычек может её и удлинить.
+//
+// По умолчанию берётся с запасом от FMTLOG_LOKI_BATCH и FMTLOG_LOKI_TEXT_SIZE
+// - меняя их, про буфер можно не вспоминать. Пачка, не влезшая в буфер, не
+// уйдёт вовсе, и это будет видно в loki::lost().
+#ifndef FMTLOG_LOKI_BODY_SIZE
+#define FMTLOG_LOKI_BODY_SIZE \
+    (128 + FMTLOG_LOKI_BATCH * (FMTLOG_LOKI_TEXT_SIZE + 48))
+#endif
+
+// Адрес Loki вместе с путём.
+#ifndef FMTLOG_LOKI_HOST_SIZE
+#define FMTLOG_LOKI_HOST_SIZE 64
+#endif
+
+// Сколько ждать Loki, прежде чем считать отправку неудавшейся. Ожидание
+// задерживает loop(), поэтому лучше короткое: не ушло сейчас - уйдёт со
+// следующей пачкой.
+#ifndef FMTLOG_LOKI_TIMEOUT_MS
+#define FMTLOG_LOKI_TIMEOUT_MS 1000
+#endif

@@ -1,0 +1,43 @@
+# Loki и Grafana для просмотра журнала с платы.
+#
+# Поднимается одной командой, ничего не настраивая:
+#
+#     docker compose up -d
+#
+# Grafana откроется на http://localhost:3000, источник данных Loki в ней уже
+# прописан - логин и пароль не спрашиваются.
+#
+# Плате укажите адрес этой машины:
+#
+#     loki::begin("192.168.1.10");   // порт 3100 по умолчанию
+
+services:
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: fmtlog-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: fmtlog-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      # Смотреть журнал - дело своей сети, пароль тут только мешает.
+      # Открывать наружу такую Grafana нельзя.
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/loki.yml:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
+  grafana-data:

@@ -9,6 +9,7 @@
 //     #include <FmtTelnet.h>   журнал по сети с историей
 //     #include <FmtWeb.h>      журнал на веб-странице
 //     #include <FmtSnmp.h>     уведомления монитору по SNMP
+//     #include <FmtLoki.h>     строки в Loki, смотреть в Grafana
 #pragma once
 
 #include <FmtTiny.h>
