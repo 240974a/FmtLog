@@ -106,6 +106,79 @@ namespace {
         TEST_ASSERT_TRUE(contains("..."));
     }
 
+
+    // --- вывод в произвольный приёмник ---------------------------------
+    //
+    // Из этого собран и telnet: та же строка, тот же цвет.
+
+    void test_write_goes_to_any_print() {
+        reset();
+        Print other;
+        Record record{};
+        record.level = Level::info;
+        record.text = "to another stream";
+        record.length = 17;
+        color::write(other, record);
+        TEST_ASSERT_TRUE(other.captured().find("to another stream") !=
+                         std::string::npos);
+        // В порт при этом ничего не ушло.
+        TEST_ASSERT_EQUAL_STRING("", Serial.captured().c_str());
+    }
+
+    // Строка одна и та же, куда бы ни писали: иначе журнал в порту и в telnet
+    // читался бы по-разному. Отметку времени отбрасываем - она берётся в
+    // момент записи и у двух вызовов заведомо разная.
+    void test_write_matches_serial_sink() {
+        reset();
+        log::info("same line");
+        const std::string viaSerial = Serial.captured();
+
+        Serial.reset();
+        Print other;
+        Record record{};
+        record.level = Level::info;
+        record.text = "same line";
+        record.length = 9;
+        color::write(other, record);
+
+        const size_t at = viaSerial.find(" \033[38;5;");   // конец отметки
+        TEST_ASSERT_TRUE(at != std::string::npos);
+        TEST_ASSERT_EQUAL_STRING(viaSerial.substr(at).c_str(),
+                                 other.captured().substr(at).c_str());
+    }
+
+    // Уровень, источник и текст - всё на месте, а не один текст.
+    void test_write_carries_all_fields() {
+        reset();
+        const char* const kSources[] = {"app", "net"};
+        log::setSourceNames(kSources, 2);
+        Print other;
+        Record record{};
+        record.level = Level::err;
+        record.source = 1;
+        record.text = "gone";
+        record.length = 4;
+        color::write(other, record);
+        const std::string line = other.captured();
+        TEST_ASSERT_TRUE(line.find("E") != std::string::npos);
+        TEST_ASSERT_TRUE(line.find("net") != std::string::npos);
+        TEST_ASSERT_TRUE(line.find("gone") != std::string::npos);
+    }
+
+    // Терминал telnet без возврата каретки уводит строки лесенкой.
+    void test_line_ends_with_crlf() {
+        reset();
+        Print other;
+        Record record{};
+        record.level = Level::info;
+        record.text = "x";
+        record.length = 1;
+        color::write(other, record);
+        const std::string line = other.captured();
+        TEST_ASSERT_TRUE(line.size() >= 2);
+        TEST_ASSERT_EQUAL_STRING("\r\n", line.substr(line.size() - 2).c_str());
+    }
+
 } // namespace
 
 int main() {
@@ -120,5 +193,9 @@ int main() {
     RUN_TEST(test_level_colors_can_be_replaced);
     RUN_TEST(test_no_color_prints_nothing);
     RUN_TEST(test_truncated_message_is_marked);
+    RUN_TEST(test_write_goes_to_any_print);
+    RUN_TEST(test_write_matches_serial_sink);
+    RUN_TEST(test_write_carries_all_fields);
+    RUN_TEST(test_line_ends_with_crlf);
     return UNITY_END();
 }

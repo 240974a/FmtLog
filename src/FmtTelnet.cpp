@@ -4,6 +4,7 @@
 #if defined(ESP8266) || defined(ESP32)
 
 #include "FmtTelnet.h"
+#include "FmtColor.h"
 
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
@@ -65,11 +66,29 @@ namespace fmtlog {
             }
         } // namespace
 
+        namespace {
+            // Пишет строку прямо в историю: собирать её во временный буфер, а
+            // потом копировать - лишний расход стека на каждое сообщение.
+            class ToHistory : public Print {
+              public:
+                size_t write(uint8_t byte) override {
+                    history.write(static_cast<char>(byte));
+                    return 1;
+                }
+                size_t write(const uint8_t* data, size_t length) override {
+                    history.write(reinterpret_cast<const char*>(data),
+                                  static_cast<uint32_t>(length));
+                    return length;
+                }
+            };
+        } // namespace
+
         void sink(const Record& record) {
-            history.write(record.text, record.length);
-            if(record.truncated)
-                history.write(" ...", 4);
-            history.write("\r\n", 2);
+            // Та же строка, что уходит в порт: время, уровень, источник и
+            // текст. Цвет тоже - терминал понимает те же последовательности
+            // ANSI, а кому он мешает, тот снимет его color::setEnabled(false).
+            ToHistory out;
+            color::write(out, record);
         }
 
         void begin(uint16_t port) {

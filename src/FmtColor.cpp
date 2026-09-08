@@ -71,35 +71,41 @@ namespace fmtlog {
                 out.print(F("\033[0m"));
         }
 
-        void serialSink(const Record& record) {
+        void write(Print& to, const Record& record) {
             char head[32];
             Fmt out(head, sizeof(head));
 
-            apply(Serial, kTimeColor);
+            apply(to, kTimeColor);
             log::writeTimestamp(out, record);
             out.write(' ');
-            Serial.print(out.c_str());
+            to.print(out.c_str());
 
             // Уровень задаёт цвет строки, источник печатается своим.
             const uint8_t lineColor = levelColor(record.level);
-            apply(Serial, lineColor);
-            Serial.print(log::levelMark(record.level));
-            Serial.print(' ');
+            apply(to, lineColor);
+            to.print(log::levelMark(record.level));
+            to.print(' ');
 
-            apply(Serial, sourceColor(record.source));
-            Serial.print(log::sourceName(record.source));
+            apply(to, sourceColor(record.source));
+            to.print(log::sourceName(record.source));
 
-            apply(Serial, lineColor);
-            Serial.print(F(": "));
-            Serial.print(record.text);
+            apply(to, lineColor);
+            to.print(F(": "));
+            to.write(record.text, record.length);
 
             // Обрезанное сообщение помечаем: иначе потеря хвоста незаметна.
             if(record.truncated) {
-                apply(Serial, red);
-                Serial.print(F(" ..."));
+                apply(to, red);
+                to.print(F(" ..."));
             }
-            reset(Serial);
-            Serial.println();
+            reset(to);
+            // Возврат каретки нужен telnet: терминал без него уводит строки
+            // лесенкой. Порту он не мешает.
+            to.print(F("\r\n"));
+        }
+
+        void serialSink(const Record& record) {
+            write(Serial, record);
         }
 
     } // namespace color

@@ -96,6 +96,12 @@ class Print {
     void print(uint8_t value) {
         out_ += std::to_string(value);
     }
+    // Длина задаётся явно: в сообщении журнала может быть ноль, и обрывать
+    // по нему нельзя. В настоящем Arduino такой write тоже есть.
+    size_t write(const char* data, size_t length) {
+        out_.append(data, length);
+        return length;
+    }
     void println() {
         out_ += '\n';
     }

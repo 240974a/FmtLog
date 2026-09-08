@@ -37,6 +37,14 @@ namespace fmtlog {
         // Приёмник с раскраской - замена log::serialSink.
         void serialSink(const Record& record);
 
+        // Пишет ту же строку в любой приёмник, умеющий Print: порт, telnet,
+        // карту памяти. Из неё и собран serialSink.
+        //
+        //     void mySink(const Record& record) {
+        //         color::write(myStream, record);
+        //     }
+        void write(Print& out, const Record& record);
+
         // Свой цвет каждому источнику: поток из разных частей приложения
         // читается с одного взгляда.
         //
