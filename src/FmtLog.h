@@ -4,6 +4,7 @@
 //
 // Отдельно подключаются:
 //     #include <FmtColor.h>    цветной вывод в терминал
+//     #include <FmtTelnet.h>   журнал по сети с историей
 //     #include <FmtEeprom.h>   вывод строк из EEPROM
 #pragma once
 

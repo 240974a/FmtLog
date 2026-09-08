@@ -120,3 +120,17 @@ namespace std {
 #ifndef FMTLOG_COMPILE_LEVEL
 #define FMTLOG_COMPILE_LEVEL 0
 #endif
+
+// --- журнал по сети (FmtTelnet.h) -----------------------------------------
+
+// Сколько сообщений хранить для тех, кто подключится позже. Память занимается,
+// только если FmtTelnet.h включён.
+#ifndef FMTLOG_HISTORY_SIZE
+#define FMTLOG_HISTORY_SIZE 2048
+#endif
+
+// Сколько соединений принимать одновременно. Каждое стоит клиента ядра плюс
+// место в истории - десяток байт.
+#ifndef FMTLOG_TELNET_CLIENTS
+#define FMTLOG_TELNET_CLIENTS 4
+#endif
