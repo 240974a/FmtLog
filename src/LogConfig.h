@@ -59,3 +59,37 @@
 #ifndef FMTLOG_WEB_CLIENTS
 #define FMTLOG_WEB_CLIENTS 2
 #endif
+
+// --- уведомления по SNMP (FmtSnmp.h) --------------------------------------
+
+// Сколько trap'ов держать, пока их не отправит handle(). Они редки, а
+// если сеть лежит дольше, чем вмещает очередь, дежурному важнее свежая -
+// самая старая теряется, и это видно в snmp::lost().
+#ifndef FMTLOG_SNMP_QUEUE
+#define FMTLOG_SNMP_QUEUE 4
+#endif
+
+// Сколько знаков сообщения уходит в trap. Длинный текст читают в журнале,
+// а здесь важна суть: что случилось и где.
+#ifndef FMTLOG_SNMP_TEXT_SIZE
+#define FMTLOG_SNMP_TEXT_SIZE 96
+#endif
+
+// Буфер под собранный пакет. Больше сообщения с запасом на обёртки BER.
+#ifndef FMTLOG_SNMP_PACKET_SIZE
+#define FMTLOG_SNMP_PACKET_SIZE 256
+#endif
+
+// Длина community-строки и корня OID вместе с завершающим нулём.
+#ifndef FMTLOG_SNMP_COMMUNITY_SIZE
+#define FMTLOG_SNMP_COMMUNITY_SIZE 24
+#endif
+#ifndef FMTLOG_SNMP_OID_SIZE
+#define FMTLOG_SNMP_OID_SIZE 48
+#endif
+
+// Из скольких чисел может состоять OID. Стандартные ветки короче десятка.
+#ifndef FMTLOG_SNMP_OID_PARTS
+#define FMTLOG_SNMP_OID_PARTS 16
+#endif
+

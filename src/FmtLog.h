@@ -8,6 +8,7 @@
 //     #include <FmtColor.h>    цветной вывод в терминал
 //     #include <FmtTelnet.h>   журнал по сети с историей
 //     #include <FmtWeb.h>      журнал на веб-странице
+//     #include <FmtSnmp.h>     уведомления монитору по SNMP
 #pragma once
 
 #include <FmtTiny.h>

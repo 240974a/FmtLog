@@ -18,7 +18,7 @@ namespace fmtlog {
                 yellow,     // warn
                 red,        // err
                 magenta,    // critical - заметнее ошибки, её и надо заметить
-                white,      // system   - вехи работы, не тревога
+                white,      // system   - вехи работы, не сбой
             };
             constexpr uint8_t kLevelCount
                 = sizeof(kDefaultLevelColors) / sizeof(kDefaultLevelColors[0]);
