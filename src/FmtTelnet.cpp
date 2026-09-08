@@ -1,11 +1,14 @@
+// Модуль собирается только там, где есть сеть. На прочих платах файл пуст:
+// иначе он ломал бы сборку приложению, которое telnet и не включает - в
+// библиотеке Arduino компилируются все исходники подряд.
+#if defined(ESP8266) || defined(ESP32)
+
 #include "FmtTelnet.h"
 
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
-#elif defined(ESP32)
-#include <WiFi.h>
 #else
-#error "FmtTelnet.h requires WiFi: use it on ESP8266 or ESP32"
+#include <WiFi.h>
 #endif
 
 namespace fmtlog {
@@ -139,3 +142,5 @@ namespace fmtlog {
 
     } // namespace telnet
 } // namespace fmtlog
+
+#endif // ESP8266 || ESP32

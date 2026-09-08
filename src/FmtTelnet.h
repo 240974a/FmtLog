@@ -22,6 +22,10 @@
 // кодом.
 #pragma once
 
+#if !defined(ESP8266) && !defined(ESP32)
+#error "FmtTelnet.h needs WiFi: it works on ESP8266 and ESP32 only"
+#endif
+
 #include "FmtHistory.h"
 #include "Log.h"
 

@@ -1,5 +1,5 @@
 // Исходники библиотеки включаются в сборку теста напрямую: при проверке на
 // машине разработчика PlatformIO не собирает корень проекта как библиотеку
 // Arduino.
-#include "../../src/Fmt.cpp"
+#include <Fmt.cpp>   // из .pio/libdeps, путь даёт build_flags
 #include "../../src/Log.cpp"

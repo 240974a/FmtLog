@@ -14,9 +14,23 @@
 // часть приложения нетрудно приглушить, не трогая остальные.
 #pragma once
 
-#include "Fmt.h"
+#include "LogConfig.h"
 
 namespace fmtlog {
+
+    // Форматирование пришло из FmtTiny - подтягиваем его имена, чтобы
+    // приложению не приходилось писать оба пространства.
+    using fmttiny::Fmt;
+    using fmttiny::formatter;
+    using fmttiny::StringView;
+    using fmttiny::opt;
+    using fmttiny::Duration;
+    using fmttiny::DateTime;
+    using fmttiny::DateTimeSortable;
+    using fmttiny::TimeOfDay;
+    using fmttiny::FixedWidth;
+    using fmttiny::HexDump;
+    using fmttiny::FullDump;
 
     // Уровни важности по возрастанию.
     //
