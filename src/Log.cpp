@@ -41,6 +41,19 @@ namespace fmtlog {
 
         // Одна буква на уровень: в тесном выводе она читается не хуже слова,
         // а места занимает меньше.
+        const char* levelName(Level level) {
+            switch(level) {
+            case Level::trace: return "trace";
+            case Level::debug: return "debug";
+            case Level::info: return "info";
+            case Level::warn: return "warn";
+            case Level::err: return "error";
+            case Level::critical: return "critical";
+            case Level::system: return "system";
+            default: return "none";
+            }
+        }
+
         char levelMark(Level level) {
             switch(level) {
             case Level::trace: return 'T';

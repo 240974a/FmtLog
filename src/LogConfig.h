@@ -46,3 +46,16 @@
 #ifndef FMTLOG_TELNET_CLIENTS
 #define FMTLOG_TELNET_CLIENTS 4
 #endif
+
+// --- журнал на веб-страницу (FmtWeb.h) ------------------------------------
+
+// Сколько строк хранить для вкладок, открытых позже. Память занимается,
+// только если FmtWeb.h включён.
+#ifndef FMTLOG_WEB_HISTORY_SIZE
+#define FMTLOG_WEB_HISTORY_SIZE 4096
+#endif
+
+// Сколько вкладок обслуживать одновременно.
+#ifndef FMTLOG_WEB_CLIENTS
+#define FMTLOG_WEB_CLIENTS 2
+#endif

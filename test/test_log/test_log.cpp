@@ -4,6 +4,7 @@
 
 #include <unity.h>
 
+#include <cstring>
 #include <string>
 
 #include "Log.h"
@@ -114,6 +115,19 @@ namespace {
         TEST_ASSERT_FALSE(log::enabled(Level::err));
         TEST_ASSERT_TRUE(log::enabled(Level::critical));
         TEST_ASSERT_TRUE(log::enabled(Level::system));
+    }
+
+    // Имена уровней читают не только глазами: они попадают в метки
+    // Prometheus и в поля JSON, поэтому должны быть различимы и непусты.
+    void test_level_names_are_distinct() {
+        const Level all[] = {Level::trace, Level::debug, Level::info, Level::warn,
+                             Level::err, Level::critical, Level::system};
+        for(size_t i = 0; i < 7; ++i) {
+            TEST_ASSERT_NOT_NULL(log::levelName(all[i]));
+            TEST_ASSERT_TRUE(strlen(log::levelName(all[i])) > 0);
+            for(size_t j = i + 1; j < 7; ++j)
+                TEST_ASSERT_TRUE(strcmp(log::levelName(all[i]), log::levelName(all[j])) != 0);
+        }
     }
 
     void test_level_marks_are_distinct() {
@@ -241,6 +255,7 @@ int main() {
     RUN_TEST(test_mandatory_levels_ignore_threshold);
     RUN_TEST(test_mandatory_levels_ignore_source_threshold);
     RUN_TEST(test_enabled_reports_mandatory_as_enabled);
+    RUN_TEST(test_level_names_are_distinct);
     RUN_TEST(test_level_marks_are_distinct);
     RUN_TEST(test_level_source_is_asked_every_time);
     RUN_TEST(test_level_source_overrides_stored_levels);

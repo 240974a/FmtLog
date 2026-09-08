@@ -132,8 +132,15 @@ namespace fmtlog {
         void setSourceNames(const char* const* names, uint8_t count);
         const char* sourceName(uint8_t source);
 
-        // Одна буква на уровень: T, D, I, W, E.
+        // Одна буква на уровень: T, D, I, W, E, C, S.
         char levelMark(Level level);
+
+        // Имя уровня словом: "trace", "info", "error" и так далее.
+        //
+        // Нужно приёмникам, чей вывод читают не только глазами: в метке
+        // Prometheus или в поле JSON буква "E" ничего не говорит, а "error"
+        // понятен и человеку, и системе разбора.
+        const char* levelName(Level level);
 
         // Отметка времени записи, ширина всегда 21 знак:
         //

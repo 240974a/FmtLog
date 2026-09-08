@@ -1,0 +1,92 @@
+<!doctype html><html lang=en><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Log</title><style>
+:root{--bg:#0d1117;--fg:#c9d1d9;--dim:#6e7681;--line:#21262d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px ui-monospace,Menlo,Consolas,monospace}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,button{background:#161b22;color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:4px 8px;font:inherit}
+button{cursor:pointer}button:hover{border-color:var(--dim)}
+#s{flex:1;min-width:120px}
+#log{padding:4px 8px}
+.r{white-space:pre-wrap;word-break:break-word;padding:1px 0;border-left:3px solid transparent;padding-left:6px}
+.r:hover{background:#161b22}
+.t{color:var(--dim)}
+.T{color:#8b949e}.D{color:#58a6ff}.I{color:#3fb950}.W{color:#d29922}.E{color:#f85149}
+.C{color:#bc8cff;border-left-color:#bc8cff}.S{color:#fff;border-left-color:#30363d}
+.hid{display:none}
+#st{color:var(--dim);font-size:11px}
+mark{background:#bb8009;color:#000}
+</style>
+<header>
+<input id=host placeholder="192.168.1.50" size=13 title="board address">
+<input id=s placeholder="search" autocomplete=off>
+<select id=lv><option value=0>all</option><option value=1>debug+</option>
+<option value=2>info+</option><option value=3>warn+</option><option value=4>error+</option></select>
+<input id=dt type=date title="jump to date">
+<button id=pause>pause</button><button id=clr>clear</button><button id=exp>export</button>
+<span id=st>connecting</span>
+</header>
+<div id=log></div>
+<script>
+const L='TDIWECS',log=document.getElementById('log'),st=document.getElementById('st');
+let rows=[],paused=false,hold=[];
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function add(r){
+  const d=document.createElement('div');d.className='r '+r.l;
+  d.dataset.lv=L.indexOf(r.l);d.dataset.txt=(r.s+' '+r.m).toLowerCase();
+  d.dataset.day=r.t.slice(0,8);
+  d.innerHTML='<span class=t>'+esc(r.t)+'</span> '+r.l+' '+esc(r.s)+': '+esc(r.m);
+  log.appendChild(d);rows.push(d);
+  while(rows.length>2000)rows.shift().remove();
+  filter1(d);
+  if(!paused)window.scrollTo(0,document.body.scrollHeight);
+}
+function filter1(d){
+  const q=document.getElementById('s').value.toLowerCase(),
+        min=+document.getElementById('lv').value;
+  let ok=(+d.dataset.lv>=min||+d.dataset.lv>4)&&(!q||d.dataset.txt.includes(q));
+  d.classList.toggle('hid',!ok);
+}
+function filterAll(){rows.forEach(filter1)}
+document.getElementById('s').oninput=filterAll;
+document.getElementById('lv').onchange=filterAll;
+document.getElementById('dt').onchange=e=>{
+  const d=e.target.value.slice(2).replace(/-/g,'-');
+  const hit=rows.find(r=>r.dataset.day>=d);
+  if(hit)hit.scrollIntoView({block:'center'});
+};
+document.getElementById('pause').onclick=e=>{
+  paused=!paused;e.target.textContent=paused?'resume':'pause';
+  if(!paused){hold.forEach(add);hold=[]}
+};
+document.getElementById('clr').onclick=()=>{log.innerHTML='';rows=[]};
+document.getElementById('exp').onclick=()=>{
+  const txt=rows.filter(r=>!r.classList.contains('hid')).map(r=>r.textContent).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download='log.txt';a.click();
+};
+// Адрес платы помним между открытиями страницы.
+const H=document.getElementById('host');
+H.value=localStorage.getItem('host')||'';
+let es=null;
+function connect(){
+  const h=H.value.trim();
+  if(!h){st.textContent='enter board address';return}
+  localStorage.setItem('host',h);
+  if(es)es.close();
+  st.textContent='connecting';
+  es=new EventSource('http://'+h+'/log');
+  es.onopen=()=>st.textContent='live';
+  es.onerror=()=>st.textContent='reconnecting';
+  es.onmessage=e=>{
+    const p=e.data.split('\t');
+    if(p.length<4)return;
+    const r={t:p[0],l:p[1],s:p[2],m:p.slice(3).join('\t')};
+    paused?hold.push(r):add(r);
+  };
+}
+H.onchange=connect;
+if(H.value)connect();else st.textContent='enter board address';
+</script></html>
