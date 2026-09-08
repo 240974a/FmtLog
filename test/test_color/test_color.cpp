@@ -48,16 +48,27 @@ namespace {
     }
 
     void test_levels_have_distinct_colors() {
-        TEST_ASSERT_NOT_EQUAL(color::levelColor(Level::info), color::levelColor(Level::error));
-        TEST_ASSERT_NOT_EQUAL(color::levelColor(Level::warning), color::levelColor(Level::error));
+        TEST_ASSERT_NOT_EQUAL(color::levelColor(Level::info), color::levelColor(Level::err));
+        TEST_ASSERT_NOT_EQUAL(color::levelColor(Level::warn), color::levelColor(Level::err));
     }
 
     // Иначе строка сливается в одно пятно и уровень перестаёт читаться.
     void test_no_level_matches_the_timestamp_color() {
-        const Level levels[] = {Level::trace, Level::debug, Level::info, Level::warning,
-                                Level::error};
+        const Level levels[] = {Level::trace, Level::debug, Level::info, Level::warn,
+                                Level::err};
         for(Level level : levels)
             TEST_ASSERT_NOT_EQUAL(color::darkGray, color::levelColor(level));
+    }
+
+    // Цвет должен быть у каждого уровня, включая critical и system: без
+    // него буква сливается с цветом времени.
+    void test_every_level_has_its_own_color() {
+        const Level all[] = {Level::trace, Level::debug, Level::info, Level::warn,
+                             Level::err, Level::critical, Level::system};
+        for(size_t i = 0; i < 7; ++i) {
+            TEST_ASSERT_NOT_EQUAL(color::noColor, color::levelColor(all[i]));
+            TEST_ASSERT_NOT_EQUAL(color::darkGray, color::levelColor(all[i]));
+        }
     }
 
     void test_source_colors_are_used() {
@@ -104,6 +115,7 @@ int main() {
     RUN_TEST(test_color_can_be_disabled);
     RUN_TEST(test_levels_have_distinct_colors);
     RUN_TEST(test_no_level_matches_the_timestamp_color);
+    RUN_TEST(test_every_level_has_its_own_color);
     RUN_TEST(test_source_colors_are_used);
     RUN_TEST(test_level_colors_can_be_replaced);
     RUN_TEST(test_no_color_prints_nothing);

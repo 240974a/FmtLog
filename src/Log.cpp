@@ -9,6 +9,7 @@ namespace fmtlog {
             constexpr uint8_t kUnset = 0xFF;
 
             Level commonLevel = Level::info;
+            LevelSource levelSource = nullptr;
             uint8_t sourceLevels[FMTLOG_SOURCE_COUNT];
             bool sourceLevelsReady = false;
 
@@ -45,8 +46,10 @@ namespace fmtlog {
             case Level::trace: return 'T';
             case Level::debug: return 'D';
             case Level::info: return 'I';
-            case Level::warning: return 'W';
-            case Level::error: return 'E';
+            case Level::warn: return 'W';
+            case Level::err: return 'E';
+            case Level::critical: return 'C';
+            case Level::system: return 'S';
             default: return '?';
             }
         }
@@ -154,7 +157,15 @@ namespace fmtlog {
                 sourceLevels[source] = static_cast<uint8_t>(level);
         }
 
+        void setLevelSource(LevelSource source) {
+            levelSource = source;
+        }
+
         Level getLevel(uint8_t source) {
+            // Когда уровни хранит приложение, спрашиваем у него: так правка
+            // действует сразу, без оповещения библиотеки.
+            if(levelSource)
+                return levelSource(source);
             ensureSourceLevels();
             if(source < FMTLOG_SOURCE_COUNT && sourceLevels[source] != kUnset)
                 return static_cast<Level>(sourceLevels[source]);
@@ -162,6 +173,9 @@ namespace fmtlog {
         }
 
         bool enabled(Level level, uint8_t source) {
+            // Критическое и системное печатается независимо от порога.
+            if(isMandatory(level))
+                return true;
             return static_cast<uint8_t>(level) >= static_cast<uint8_t>(getLevel(source));
         }
 

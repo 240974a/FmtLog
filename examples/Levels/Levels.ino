@@ -9,7 +9,7 @@ using namespace fmtlog;
 
 void applyCommand(char command) {
     switch(command) {
-    case 'q': log::setLevel(Level::error); break;   // только ошибки
+    case 'q': log::setLevel(Level::err); break;   // только ошибки
     case 'n': log::setLevel(Level::info); break;    // обычный режим
     case 'v': log::setLevel(Level::debug); break;   // подробно
     case 't': log::setLevel(Level::trace); break;   // всё подряд

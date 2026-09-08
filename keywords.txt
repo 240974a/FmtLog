@@ -38,6 +38,10 @@ setLevel	KEYWORD2
 getLevel	KEYWORD2
 enabled	KEYWORD2
 setTime	KEYWORD2
+rewind	KEYWORD2
+seekToEnd	KEYWORD2
+pending	KEYWORD2
+clientCount	KEYWORD2
 timeIsSet	KEYWORD2
 currentTime	KEYWORD2
 writeTimestamp	KEYWORD2
@@ -52,13 +56,17 @@ sourceName	KEYWORD2
 trace	KEYWORD2
 debug	KEYWORD2
 info	KEYWORD2
-warning	KEYWORD2
-error	KEYWORD2
+warn	KEYWORD2
+err	KEYWORD2
+critical	KEYWORD2
+system	KEYWORD2
 traceFrom	KEYWORD2
 debugFrom	KEYWORD2
 infoFrom	KEYWORD2
-warningFrom	KEYWORD2
-errorFrom	KEYWORD2
+warnFrom	KEYWORD2
+errFrom	KEYWORD2
+criticalFrom	KEYWORD2
+systemFrom	KEYWORD2
 
 #######################################
 # Константы (LITERAL1)

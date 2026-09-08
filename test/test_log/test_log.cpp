@@ -45,30 +45,30 @@ namespace {
     // Сообщение ниже порога не должно собираться вовсе.
     void test_level_below_threshold_is_dropped() {
         reset();
-        log::setLevel(Level::warning);
+        log::setLevel(Level::warn);
         log::info("must not appear");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
     }
 
     void test_level_at_threshold_passes() {
         reset();
-        log::setLevel(Level::warning);
-        log::warning("at threshold");
-        log::error("above threshold");
+        log::setLevel(Level::warn);
+        log::warn("at threshold");
+        log::err("above threshold");
         TEST_ASSERT_EQUAL_INT(2, recordCount);
     }
 
     void test_level_none_silences_everything() {
         reset();
         log::setLevel(Level::none);
-        log::error("even errors are silent");
+        log::err("even errors are silent");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
     }
 
     // Уровень источника перекрывает общий - только для своего источника.
     void test_source_level_overrides_common() {
         reset();
-        log::setLevel(Level::error);
+        log::setLevel(Level::err);
         log::setLevel(2, Level::debug);
 
         log::debugFrom(1, "muted by the common level");
@@ -83,7 +83,83 @@ namespace {
         log::setLevel(Level::info);
         TEST_ASSERT_FALSE(log::enabled(Level::debug));
         TEST_ASSERT_TRUE(log::enabled(Level::info));
-        TEST_ASSERT_TRUE(log::enabled(Level::error));
+        TEST_ASSERT_TRUE(log::enabled(Level::err));
+    }
+
+    // Critical и system нужны в журнале всегда - порог их не глушит.
+    void test_mandatory_levels_ignore_threshold() {
+        reset();
+        log::setLevel(Level::none);
+
+        log::info("dropped");
+        TEST_ASSERT_EQUAL_INT(0, recordCount);
+
+        log::critical("always shown");
+        TEST_ASSERT_EQUAL_INT(1, recordCount);
+
+        log::system("also always");
+        TEST_ASSERT_EQUAL_INT(2, recordCount);
+    }
+
+    void test_mandatory_levels_ignore_source_threshold() {
+        reset();
+        log::setLevel(2, Level::none);
+        log::criticalFrom(2, "still shown");
+        TEST_ASSERT_EQUAL_INT(1, recordCount);
+    }
+
+    void test_enabled_reports_mandatory_as_enabled() {
+        reset();
+        log::setLevel(Level::none);
+        TEST_ASSERT_FALSE(log::enabled(Level::err));
+        TEST_ASSERT_TRUE(log::enabled(Level::critical));
+        TEST_ASSERT_TRUE(log::enabled(Level::system));
+    }
+
+    void test_level_marks_are_distinct() {
+        const Level all[] = {Level::trace, Level::debug, Level::info, Level::warn,
+                             Level::err, Level::critical, Level::system};
+        for(size_t i = 0; i < 7; ++i)
+            for(size_t j = i + 1; j < 7; ++j)
+                TEST_ASSERT_NOT_EQUAL(log::levelMark(all[i]), log::levelMark(all[j]));
+    }
+
+    // --- уровни от приложения ----------------------------------------------
+
+    Level externalLevels[4] = {Level::info, Level::info, Level::info, Level::info};
+
+    Level askApplication(uint8_t source) {
+        return source < 4 ? externalLevels[source] : Level::info;
+    }
+
+    // Когда уровни хранит приложение, правка действует сразу - библиотеке
+    // ничего сообщать не нужно.
+    void test_level_source_is_asked_every_time() {
+        reset();
+        externalLevels[1] = Level::err;
+        log::setLevelSource(askApplication);
+
+        log::infoFrom(1, "dropped");
+        TEST_ASSERT_EQUAL_INT(0, recordCount);
+
+        externalLevels[1] = Level::trace;   // приложение изменило уровень
+        log::infoFrom(1, "now shown");
+        TEST_ASSERT_EQUAL_INT(1, recordCount);
+
+        log::setLevelSource(nullptr);
+    }
+
+    // Пока источник задан, setLevel библиотеки на решение не влияет.
+    void test_level_source_overrides_stored_levels() {
+        reset();
+        externalLevels[0] = Level::err;
+        log::setLevelSource(askApplication);
+        log::setLevel(Level::trace);        // библиотеке это не поможет
+
+        log::info("dropped");
+        TEST_ASSERT_EQUAL_INT(0, recordCount);
+
+        log::setLevelSource(nullptr);
     }
 
     // --- приёмники --------------------------------------------------------
@@ -162,6 +238,12 @@ int main() {
     RUN_TEST(test_level_none_silences_everything);
     RUN_TEST(test_source_level_overrides_common);
     RUN_TEST(test_enabled_matches_actual_output);
+    RUN_TEST(test_mandatory_levels_ignore_threshold);
+    RUN_TEST(test_mandatory_levels_ignore_source_threshold);
+    RUN_TEST(test_enabled_reports_mandatory_as_enabled);
+    RUN_TEST(test_level_marks_are_distinct);
+    RUN_TEST(test_level_source_is_asked_every_time);
+    RUN_TEST(test_level_source_overrides_stored_levels);
     RUN_TEST(test_several_sinks_receive_the_same_record);
     RUN_TEST(test_sink_is_not_added_twice);
     RUN_TEST(test_removed_sink_stops_receiving);

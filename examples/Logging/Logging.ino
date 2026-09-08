@@ -18,7 +18,7 @@ const char* const kSourceNames[] = {"app", "net", "sensor"};
 uint16_t errorCount = 0;
 
 void countErrors(const Record& record) {
-    if(record.level >= Level::error)
+    if(record.level >= Level::err)
         ++errorCount;
 }
 
@@ -39,7 +39,7 @@ void setup() {
     // Это сообщение не выведется: уровень источника sensor - info.
     log::debugFrom(sensor, F("raw value {}"), 512);
 
-    log::errorFrom(sensor, F("sensor is silent {} times in a row"), 3);
+    log::errFrom(sensor, F("sensor is silent {} times in a row"), 3);
 
     // Приёмник считал ошибки, пока журнал их печатал.
     log::infoFrom(app, F("errors since start: {}"), errorCount);

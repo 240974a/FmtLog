@@ -55,8 +55,8 @@ int main() {
 
     log::debugFrom(1, "received {} bytes", 128);
     log::infoFrom(2, "boiler {} C", 54.25);
-    log::warningFrom(1, "no answer {} times in a row", 3);
-    log::errorFrom(2, "sensor is silent");
+    log::warnFrom(1, "no answer {} times in a row", 3);
+    log::errFrom(2, "sensor is silent");
     fputs(Serial.captured().c_str(), stdout);
 }
 CPP

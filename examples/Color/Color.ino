@@ -33,17 +33,18 @@ void setup() {
     log::debugFrom(net, F("received {} bytes"), 128);
     log::infoFrom(app, F("started, version {}"), F("1.2.0"));
     log::infoFrom(sensor, F("boiler {} C"), 54.25);
-    log::warningFrom(net, F("no answer {} times in a row"), 3);
-    log::errorFrom(sensor, F("sensor is silent"));
+    log::warnFrom(net, F("no answer {} times in a row"), 3);
+    log::errFrom(sensor, F("sensor is silent"));
 
     // Раскраску можно снять на ходу, не меняя приёмник.
     color::setEnabled(false);
     log::infoFrom(app, F("plain from here on"));
     color::setEnabled(true);
 
-    // Цвета уровней тоже заменяются - массив на пять значений, от trace до error.
+    // Цвета уровней тоже заменяются - массив на семь значений, от trace до system.
     static const uint8_t kQuiet[] = {color::darkGray, color::darkGray, color::gray,
-                                     color::yellow, color::red};
+                                     color::yellow, color::red, color::magenta,
+                                     color::white};
     color::setLevelColors(kQuiet);
     log::infoFrom(app, F("quiet palette"));
 }

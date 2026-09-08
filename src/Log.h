@@ -18,8 +18,21 @@
 
 namespace fmtlog {
 
-    // Уровни важности по возрастанию. none выключает источник целиком.
-    enum class Level : uint8_t { trace, debug, info, warning, error, none };
+    // Уровни важности по возрастанию.
+    //
+    // Два последних не отключаются порогом: critical сообщает о том, после
+    // чего работа продолжаться не может, а system - о пуске, остановке и
+    // прочих вехах, которые нужны в журнале всегда.
+    //
+    // none в setLevel глушит всё, что ниже critical.
+    enum class Level : uint8_t {
+        trace, debug, info, warn, err, critical, system, none
+    };
+
+    // Отключается ли уровень порогом.
+    constexpr bool isMandatory(Level level) {
+        return level >= Level::critical && level != Level::none;
+    }
 
     // Готовое сообщение, переданное приёмнику.
     struct Record {
@@ -59,8 +72,20 @@ namespace fmtlog {
         void setLevel(uint8_t source, Level level);
         Level getLevel(uint8_t source = 0);
 
+        // Уровни могут жить не в библиотеке, а в приложении - например в
+        // EEPROM, чтобы их правили с веб-страницы. Тогда вместо хранения
+        // копии библиотека спрашивает уровень у приложения, и правка
+        // действует сразу.
+        //
+        //     log::setLevelSource([](uint8_t src) {
+        //         return storedLevels[src];
+        //     });
+        using LevelSource = Level (*)(uint8_t source);
+        void setLevelSource(LevelSource source);
+
         // Стоит ли вообще собирать это сообщение. Проверяется до
         // форматирования, поэтому отброшенный вызов почти ничего не стоит.
+        // Уровни critical и system проходят всегда.
         bool enabled(Level level, uint8_t source = 0);
 
         // --- время --------------------------------------------------------
@@ -126,8 +151,10 @@ namespace fmtlog {
         FMTLOG_DECLARE_LEVEL(trace, Level::trace)
         FMTLOG_DECLARE_LEVEL(debug, Level::debug)
         FMTLOG_DECLARE_LEVEL(info, Level::info)
-        FMTLOG_DECLARE_LEVEL(warning, Level::warning)
-        FMTLOG_DECLARE_LEVEL(error, Level::error)
+        FMTLOG_DECLARE_LEVEL(warn, Level::warn)
+        FMTLOG_DECLARE_LEVEL(err, Level::err)
+        FMTLOG_DECLARE_LEVEL(critical, Level::critical)
+        FMTLOG_DECLARE_LEVEL(system, Level::system)
 
 #undef FMTLOG_DECLARE_LEVEL
 

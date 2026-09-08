@@ -45,7 +45,7 @@ namespace fmtlog {
         void setSourceColors(const uint8_t* colors, uint8_t count);
 
         // Цвета уровней заданы заранее, но их можно заменить своими: массив на
-        // пять значений, по порядку от trace до error.
+        // семь значений, по порядку от trace до system.
         void setLevelColors(const uint8_t* colors);
 
         uint8_t levelColor(Level level);
