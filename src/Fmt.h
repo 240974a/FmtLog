@@ -68,6 +68,25 @@ namespace fmtlog {
         }
     };
 
+    // Дата и время в порядке от старшего к младшему: 26-09-02 14:30:45
+    // Такая запись сортируется как текст и одинаково читается в любой стране.
+    struct DateTimeSortable {
+        uint32_t epochSeconds = 0;
+
+        explicit DateTimeSortable(uint32_t seconds) : epochSeconds(seconds) {
+        }
+    };
+
+    // Целое с ведущими нулями до заданной ширины: FixedWidth(7, 3) -> 007
+    // Нужно там, где столбцы не должны разъезжаться.
+    struct FixedWidth {
+        uint32_t value = 0;
+        uint8_t width = 0;
+
+        FixedWidth(uint32_t v, uint8_t w) : value(v), width(w) {
+        }
+    };
+
     // Только время суток из того же значения: 23:59:59
     struct TimeOfDay {
         uint32_t epochSeconds = 0;
@@ -322,6 +341,14 @@ namespace fmtlog {
     template<>
     struct formatter<DateTime> {
         static void format(Fmt& out, const DateTime& value);
+    };
+    template<>
+    struct formatter<DateTimeSortable> {
+        static void format(Fmt& out, const DateTimeSortable& value);
+    };
+    template<>
+    struct formatter<FixedWidth> {
+        static void format(Fmt& out, const FixedWidth& value);
     };
     template<>
     struct formatter<TimeOfDay> {

@@ -26,17 +26,38 @@ inline char* dtostrf(double value, signed char width, unsigned char precision, c
     return buffer;
 }
 
-// Время на машине разработчика: растёт от вызова к вызову, чтобы записи
-// журнала не выглядели одномоментными. Тесты на его значение не опираются.
+// Время на машине разработчика: по умолчанию растёт от вызова к вызову, чтобы
+// записи журнала не выглядели одномоментными.
 inline uint32_t& millisValue() {
     static uint32_t value = 12104;
     return value;
 }
 
+// Тесты, которым важно точное значение, останавливают самоход и двигают время
+// сами - через millisFreeze() и millisAdvance().
+inline bool& millisFrozen() {
+    static bool frozen = false;
+    return frozen;
+}
+
 inline uint32_t millis() {
     const uint32_t now = millisValue();
-    millisValue() += 176 + (now % 7) * 61;
+    if(!millisFrozen())
+        millisValue() += 176 + (now % 7) * 61;
     return now;
+}
+
+inline void millisFreeze(uint32_t at) {
+    millisValue() = at;
+    millisFrozen() = true;
+}
+
+inline void millisAdvance(uint32_t by) {
+    millisValue() += by;
+}
+
+inline void millisResume() {
+    millisFrozen() = false;
 }
 
 // Урезанный String: библиотеке нужны только c_str() и length().

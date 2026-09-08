@@ -354,6 +354,27 @@ namespace fmtlog {
         writeTime(out, date);
     }
 
+    void formatter<DateTimeSortable>::format(Fmt& out, const DateTimeSortable& value) {
+        const CivilDate date = civilFromEpoch(value.epochSeconds);
+        writeTwoDigits(out, static_cast<uint8_t>(date.year % 100));
+        out.write('-');
+        writeTwoDigits(out, date.month);
+        out.write('-');
+        writeTwoDigits(out, date.day);
+        out.write(' ');
+        writeTime(out, date);
+    }
+
+    void formatter<FixedWidth>::format(Fmt& out, const FixedWidth& value) {
+        // Считаем разряды, чтобы дописать недостающие нули слева.
+        uint8_t digits = 1;
+        for(uint32_t rest = value.value / 10; rest; rest /= 10)
+            ++digits;
+        for(uint8_t i = digits; i < value.width; ++i)
+            out.write('0');
+        formatUnsigned(out, value.value);
+    }
+
     void formatter<TimeOfDay>::format(Fmt& out, const TimeOfDay& value) {
         writeTime(out, civilFromEpoch(value.epochSeconds));
     }

@@ -70,11 +70,12 @@ namespace fmtlog {
         }
 
         void serialSink(const Record& record) {
-            char head[24];
+            char head[32];
             Fmt out(head, sizeof(head));
 
             apply(Serial, kTimeColor);
-            out.format(F("[{}] "), Duration(static_cast<int32_t>(record.uptimeMs)));
+            log::writeTimestamp(out, record);
+            out.write(' ');
             Serial.print(out.c_str());
 
             // Уровень задаёт цвет строки, источник печатается своим.

@@ -27,7 +27,8 @@ int main() {
     log::addSink(color::serialSink);
     log::setSourceNames(names, 1);
     color::setSourceColors(colors, 1);
-    log::info("пин {} = {}, температура {} °C", 13, true, 54.25);
+    log::setTime(1788438645u, 204);   // 2026-09-03 12:30:45.204 UTC
+    log::info("pin {} = {}, temperature {} C", 13, true, 54.25);
     fputs(Serial.captured().c_str(), stdout);
 }
 CPP
@@ -45,17 +46,22 @@ int main() {
     log::setSourceNames(names, 3);
     color::setSourceColors(colors, 3);
     log::setLevel(Level::trace);
-    log::traceFrom(0, "такт {}", 4096);
-    log::debugFrom(1, "принято {} байт", 128);
-    log::infoFrom(0, "запуск, версия {}", "1.1.0");
-    log::infoFrom(2, "бойлер {} °C", 54.25);
-    log::warningFrom(1, "нет ответа {} раз подряд", 3);
-    log::errorFrom(2, "датчик не отвечает");
+
+    // Пока время не задано - счёт от запуска, той же ширины.
+    log::traceFrom(0, "tick {}", 4096);
+    log::infoFrom(0, "started, version {}", "1.2.0");
+
+    log::setTime(1788438645u, 104);   // 2026-09-03 12:30:45.104 UTC
+
+    log::debugFrom(1, "received {} bytes", 128);
+    log::infoFrom(2, "boiler {} C", 54.25);
+    log::warningFrom(1, "no answer {} times in a row", 3);
+    log::errorFrom(2, "sensor is silent");
     fputs(Serial.captured().c_str(), stdout);
 }
 CPP
 
-echo "собираю снимки:"
+echo "building screenshots:"
 build head.cpp log-example.svg
 build full.cpp log-output.svg
-echo "готово"
+echo "done"

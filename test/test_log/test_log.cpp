@@ -37,31 +37,31 @@ namespace {
 
     void test_message_reaches_sink() {
         reset();
-        log::info("пин {}", 13);
+        log::info("pin {}", 13);
         TEST_ASSERT_EQUAL_INT(1, recordCount);
-        TEST_ASSERT_EQUAL_STRING("пин 13", lastText.c_str());
+        TEST_ASSERT_EQUAL_STRING("pin 13", lastText.c_str());
     }
 
     // Сообщение ниже порога не должно собираться вовсе.
     void test_level_below_threshold_is_dropped() {
         reset();
         log::setLevel(Level::warning);
-        log::info("не должно появиться");
+        log::info("must not appear");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
     }
 
     void test_level_at_threshold_passes() {
         reset();
         log::setLevel(Level::warning);
-        log::warning("порог");
-        log::error("выше порога");
+        log::warning("at threshold");
+        log::error("above threshold");
         TEST_ASSERT_EQUAL_INT(2, recordCount);
     }
 
     void test_level_none_silences_everything() {
         reset();
         log::setLevel(Level::none);
-        log::error("даже ошибка молчит");
+        log::error("even errors are silent");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
     }
 
@@ -71,10 +71,10 @@ namespace {
         log::setLevel(Level::error);
         log::setLevel(2, Level::debug);
 
-        log::debugFrom(1, "приглушён общим уровнем");
+        log::debugFrom(1, "muted by the common level");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
 
-        log::debugFrom(2, "у источника свой уровень");
+        log::debugFrom(2, "source has its own level");
         TEST_ASSERT_EQUAL_INT(1, recordCount);
     }
 
@@ -93,7 +93,7 @@ namespace {
         static int second = 0;
         second = 0;
         log::addSink([](const Record&) { ++second; });
-        log::info("одно сообщение");
+        log::info("one message");
         TEST_ASSERT_EQUAL_INT(1, recordCount);
         TEST_ASSERT_EQUAL_INT(1, second);
     }
@@ -101,14 +101,14 @@ namespace {
     void test_sink_is_not_added_twice() {
         reset();
         log::addSink(captureSink); // тот же самый
-        log::info("одно сообщение");
+        log::info("one message");
         TEST_ASSERT_EQUAL_INT(1, recordCount);
     }
 
     void test_removed_sink_stops_receiving() {
         reset();
         log::removeSink(captureSink);
-        log::info("некуда выводить");
+        log::info("nowhere to write");
         TEST_ASSERT_EQUAL_INT(0, recordCount);
     }
 
@@ -122,7 +122,7 @@ namespace {
 
     void test_source_reaches_record() {
         reset();
-        log::infoFrom(3, "от третьего");
+        log::infoFrom(3, "from the third");
         TEST_ASSERT_EQUAL_UINT8(3, lastRecord.source);
     }
 

@@ -12,6 +12,8 @@ HexDump	KEYWORD1
 FullDump	KEYWORD1
 Duration	KEYWORD1
 DateTime	KEYWORD1
+DateTimeSortable	KEYWORD1
+FixedWidth	KEYWORD1
 TimeOfDay	KEYWORD1
 EepromString	KEYWORD1
 Level	KEYWORD1
@@ -35,6 +37,10 @@ serialSink	KEYWORD2
 setLevel	KEYWORD2
 getLevel	KEYWORD2
 enabled	KEYWORD2
+setTime	KEYWORD2
+timeIsSet	KEYWORD2
+currentTime	KEYWORD2
+writeTimestamp	KEYWORD2
 setSourceNames	KEYWORD2
 setSourceColors	KEYWORD2
 setLevelColors	KEYWORD2

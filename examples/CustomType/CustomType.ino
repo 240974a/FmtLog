@@ -29,7 +29,7 @@ void setup() {
     const Temperature broken{0.0f, false};
 
     // Дальше тип подставляется как любой встроенный.
-    log::info(F("бойлер {}, запасной датчик {}"), boiler, broken);
+    log::info(F("boiler {}, spare sensor {}"), boiler, broken);
 }
 
 void loop() {

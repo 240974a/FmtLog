@@ -21,6 +21,13 @@ namespace fmtlog {
 
             char messageBuffer[FMTLOG_MESSAGE_SIZE];
 
+            // Календарное время: что задали и когда. Между вызовами setTime
+            // время досчитывается по разности millis().
+            uint32_t baseEpochSeconds = 0;
+            uint16_t baseEpochMillis = 0;
+            uint32_t baseUptimeMs = 0;
+            bool timeKnown = false;
+
             void ensureSourceLevels() {
                 if(sourceLevelsReady)
                     return;
@@ -44,14 +51,35 @@ namespace fmtlog {
             }
         }
 
+        // --- вывод --------------------------------------------------------
+
+        void writeTimestamp(Fmt& out, const Record& record) {
+            if(record.epochSeconds) {
+                // 26-09-03 12:30:45.123
+                out.format(F("{}.{}"), DateTimeSortable(record.epochSeconds),
+                           FixedWidth(record.epochMillis, 3));
+                return;
+            }
+            // Времени ещё нет - показываем счёт от запуска. Ширина та же, что
+            // у даты, иначе столбцы разъедутся на границе синхронизации:
+            //
+            //     26-09-03 12:30:45.123
+            //     steady : 00012340.567
+            //
+            // Секунды и доля разделены так же, как у даты, - точкой.
+            const uint32_t seconds = record.uptimeMs / 1000u;
+            const uint16_t millisPart = static_cast<uint16_t>(record.uptimeMs % 1000u);
+            out.format(F("steady : {}.{}"), FixedWidth(seconds % 100000000u, 8),
+                       FixedWidth(millisPart, 3));
+        }
+
         // --- приёмники ----------------------------------------------------
 
         void serialSink(const Record& record) {
-            char head[24];
+            char head[32];
             Fmt out(head, sizeof(head));
-            // Время работы, уровень и источник: [12s:340ms] I app:
-            out.format(F("[{}] {} "), Duration(static_cast<int32_t>(record.uptimeMs)),
-                       levelMark(record.level));
+            writeTimestamp(out, record);
+            out.format(F(" {} "), levelMark(record.level));
             Serial.print(out.c_str());
             Serial.print(sourceName(record.source));
             Serial.print(F(": "));
@@ -85,6 +113,33 @@ namespace fmtlog {
 
         void clearSinks() {
             sinkCount = 0;
+        }
+
+        // --- время --------------------------------------------------------
+
+        void setTime(uint32_t epochSeconds, uint16_t millisPart) {
+            baseEpochSeconds = epochSeconds;
+            baseEpochMillis = millisPart % 1000;
+            baseUptimeMs = millis();
+            timeKnown = epochSeconds != 0;
+        }
+
+        bool timeIsSet() {
+            return timeKnown;
+        }
+
+        bool currentTime(uint32_t& epochSeconds, uint16_t& millisPart) {
+            if(!timeKnown)
+                return false;
+
+            // Вычитание беззнаковых верно и после переполнения millis()
+            // (каждые ~49.7 суток), поэтому счёт не сбивается на границе.
+            const uint32_t elapsed = millis() - baseUptimeMs;
+            const uint32_t total = baseEpochMillis + elapsed;
+
+            epochSeconds = baseEpochSeconds + total / 1000;
+            millisPart = static_cast<uint16_t>(total % 1000);
+            return true;
         }
 
         // --- уровни -------------------------------------------------------
@@ -137,8 +192,14 @@ namespace fmtlog {
             void dispatch(Level level, uint8_t source, const Fmt& message) {
                 if(message.empty())
                     return;
-                const Record record{level,           source,          millis(),
-                                    message.c_str(), message.length(), message.truncated()};
+
+                uint32_t epochSeconds = 0;
+                uint16_t epochMillis = 0;
+                currentTime(epochSeconds, epochMillis);
+
+                const Record record{level,        source,           millis(),
+                                    epochSeconds, epochMillis,      message.c_str(),
+                                    message.length(), message.truncated()};
                 for(uint8_t i = 0; i < sinkCount; ++i)
                     sinks[i](record);
             }

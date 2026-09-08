@@ -33,16 +33,16 @@ void setup() {
     log::setLevel(Level::info);
     log::setLevel(net, Level::debug);
 
-    log::infoFrom(app, F("запуск"));
-    log::debugFrom(net, F("отправлено {} байт на {}"), 128, IPAddress(192, 168, 1, 10));
+    log::infoFrom(app, F("started"));
+    log::debugFrom(net, F("sent {} bytes to {}"), 128, IPAddress(192, 168, 1, 10));
 
     // Это сообщение не выведется: уровень источника sensor - info.
-    log::debugFrom(sensor, F("сырое значение {}"), 512);
+    log::debugFrom(sensor, F("raw value {}"), 512);
 
-    log::errorFrom(sensor, F("датчик не отвечает {} раз подряд"), 3);
+    log::errorFrom(sensor, F("sensor is silent {} times in a row"), 3);
 
     // Приёмник считал ошибки, пока журнал их печатал.
-    log::infoFrom(app, F("ошибок с запуска: {}"), errorCount);
+    log::infoFrom(app, F("errors since start: {}"), errorCount);
 }
 
 void loop() {

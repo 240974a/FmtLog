@@ -15,7 +15,7 @@ void applyCommand(char command) {
     case 't': log::setLevel(Level::trace); break;   // всё подряд
     default: return;
     }
-    log::info(F("уровень журнала: {}"), static_cast<int>(log::getLevel()));
+    log::info(F("log level: {}"), static_cast<int>(log::getLevel()));
 }
 
 void setup() {
@@ -23,7 +23,7 @@ void setup() {
     log::addSink(log::serialSink);
     log::setLevel(Level::info);
 
-    log::info(F("наберите q/n/v/t, чтобы сменить уровень"));
+    log::info(F("type q/n/v/t to change the level"));
 }
 
 void loop() {
@@ -32,6 +32,6 @@ void loop() {
 
     // Проверка уровня идёт до сборки сообщения, поэтому отброшенный вызов
     // почти ничего не стоит - его можно оставлять и в горячем цикле.
-    log::trace(F("такт {}"), millis());
+    log::trace(F("tick {}"), millis());
     delay(1000);
 }

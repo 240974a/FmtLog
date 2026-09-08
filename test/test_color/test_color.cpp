@@ -27,24 +27,24 @@ namespace {
 
     void test_color_codes_appear_in_output() {
         reset();
-        log::info("цветное");
+        log::info("colored");
         TEST_ASSERT_TRUE(contains("\033[38;5;"));
     }
 
     // Без сброса цвет утёк бы на всё, что выведется в терминал дальше.
     void test_color_is_reset_at_end_of_line() {
         reset();
-        log::info("цветное");
+        log::info("colored");
         TEST_ASSERT_TRUE(contains("\033[0m"));
     }
 
     void test_color_can_be_disabled() {
         reset();
         color::setEnabled(false);
-        log::info("без цвета");
+        log::info("plain");
         TEST_ASSERT_FALSE(contains("\033["));
         // Само сообщение при этом на месте.
-        TEST_ASSERT_TRUE(contains("без цвета"));
+        TEST_ASSERT_TRUE(contains("plain"));
     }
 
     void test_levels_have_distinct_colors() {

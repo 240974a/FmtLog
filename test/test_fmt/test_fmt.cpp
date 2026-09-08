@@ -19,46 +19,46 @@ namespace {
     void test_substitutes_in_order() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("пин {} = {}", 13, 1);
-        TEST_ASSERT_EQUAL_STRING("пин 13 = 1", out.c_str());
+        out.format("pin {} = {}", 13, 1);
+        TEST_ASSERT_EQUAL_STRING("pin 13 = 1", out.c_str());
     }
 
     void test_pattern_without_placeholders() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("без вставок");
-        TEST_ASSERT_EQUAL_STRING("без вставок", out.c_str());
+        out.format("no placeholders");
+        TEST_ASSERT_EQUAL_STRING("no placeholders", out.c_str());
     }
 
     // Значений меньше, чем мест: лишние {} не должны остаться в сообщении.
     void test_missing_arguments_leave_nothing() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("{} и {}", 1);
-        TEST_ASSERT_EQUAL_STRING("1 и ", out.c_str());
+        out.format("{} and {}", 1);
+        TEST_ASSERT_EQUAL_STRING("1 and ", out.c_str());
     }
 
     // Значений больше, чем мест: лишние молча отбрасываются.
     void test_extra_arguments_are_ignored() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("только {}", 1, 2, 3);
-        TEST_ASSERT_EQUAL_STRING("только 1", out.c_str());
+        out.format("only {}", 1, 2, 3);
+        TEST_ASSERT_EQUAL_STRING("only 1", out.c_str());
     }
 
     // Иначе фигурную скобку нельзя было бы вывести вовсе.
     void test_doubled_braces_collapse() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("{{не вставка}}", 1);
-        TEST_ASSERT_EQUAL_STRING("{не вставка}", out.c_str());
+        out.format("{{not a placeholder}}", 1);
+        TEST_ASSERT_EQUAL_STRING("{not a placeholder}", out.c_str());
     }
 
     void test_lone_brace_is_printed() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("{ одинокая", 1);
-        TEST_ASSERT_EQUAL_STRING("{ одинокая", out.c_str());
+        out.format("{ lone brace", 1);
+        TEST_ASSERT_EQUAL_STRING("{ lone brace", out.c_str());
     }
 
     void test_empty_and_null_pattern() {
@@ -203,22 +203,22 @@ namespace {
     void test_opt_absent_prints_nothing() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("команда:{}", opt(false, " = ", 42));
-        TEST_ASSERT_EQUAL_STRING("команда:", out.c_str());
+        out.format("command:{}", opt(false, " = ", 42));
+        TEST_ASSERT_EQUAL_STRING("command:", out.c_str());
     }
 
     void test_opt_present_prints_prefix_and_value() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("команда:{}", opt(true, " = ", 42));
-        TEST_ASSERT_EQUAL_STRING("команда: = 42", out.c_str());
+        out.format("command:{}", opt(true, " = ", 42));
+        TEST_ASSERT_EQUAL_STRING("command: = 42", out.c_str());
     }
 
     void test_opt_with_suffix() {
         char buf[64];
         Fmt out(buf, sizeof(buf));
-        out.format("{}конец", opt(true, "(", 42, ") "));
-        TEST_ASSERT_EQUAL_STRING("(42) конец", out.c_str());
+        out.format("{}end", opt(true, "(", 42, ") "));
+        TEST_ASSERT_EQUAL_STRING("(42) end", out.c_str());
     }
 
     // Место вставки остаётся занятым и при ложном условии: следующее значение
@@ -239,8 +239,8 @@ namespace {
     void test_custom_type() {
         char buf[32];
         Fmt out(buf, sizeof(buf));
-        out.format("точка {}", Point{3, 4});
-        TEST_ASSERT_EQUAL_STRING("точка (3, 4)", out.c_str());
+        out.format("point {}", Point{3, 4});
+        TEST_ASSERT_EQUAL_STRING("point (3, 4)", out.c_str());
     }
 
     // --- дописывание ------------------------------------------------------
@@ -255,10 +255,10 @@ namespace {
     void test_clear_resets() {
         char buf[32];
         Fmt out(buf, sizeof(buf));
-        out.format("первое");
+        out.format("first");
         out.clear();
-        out.format("второе");
-        TEST_ASSERT_EQUAL_STRING("второе", out.c_str());
+        out.format("second");
+        TEST_ASSERT_EQUAL_STRING("second", out.c_str());
     }
 
 
