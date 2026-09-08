@@ -1,7 +1,7 @@
 {
     "name": "FmtLog",
-    "version": "1.2.0",
-    "description": "Лёгкий журнал для микроконтроллеров: уровни, источники и сменные приёмники вывода. Форматирование по образцу {} даёт FmtTiny. / A lightweight logger for microcontrollers: levels, sources and pluggable sinks. Pattern formatting comes from FmtTiny.",
+    "version": "1.3.0",
+    "description": "Лёгкий журнал для микроконтроллеров: уровни, источники и сменные приёмники вывода - порт, telnet, веб-страница, SNMP, Loki. Форматирование по образцу {} даёт FmtTiny. / A lightweight logger for microcontrollers: levels, sources and pluggable sinks - serial, telnet, web page, SNMP, Loki. Pattern formatting comes from FmtTiny.",
     "keywords": "format, logging, printf, string, debug",
     "authors": [
         {
